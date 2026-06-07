@@ -37,13 +37,42 @@ Construir un backend de mercado de acciones con autenticación OAuth2 + Keycloak
 3. Conversión de moneda apoyada en API externa o tabla paramétrica mockeada.
 4. Contratos entre servicios definidos primero para evitar acoplamiento accidental.
 
-## 4. Propuesta de microservicios base
-- `[[api-gateway]]`: único punto de entrada y enrutamiento.
-- `[[auth-adapter o resource-server]]`: validación de tokens y reglas de acceso.
-- `[[market-data-service]]`: cotizaciones externas y conversión de moneda.
-- `[[portfolio-service]]`: saldo, tenencias y actualización de posiciones.
-- `[[orders-service]]`: alta y resolución de órdenes de compra/venta.
-- `[[history-service]]`: auditoría e historial consultable.
+## 4. Contratos mínimos por servicio
+### `[[api-gateway]]`
+- Punto de entrada único para todos los clientes.
+- Rutea llamadas públicas y privadas.
+- Valida el token contra Keycloak antes de dejar pasar accesos protegidos.
+
+### `[[market-data-service]]`
+- `GET /quotes/{symbol}`: devuelve cotización, moneda, símbolo y timestamp.
+- Respuesta mínima: `symbol`, `price`, `currency`, `source`, `updatedAt`.
+- Este servicio alimenta el endpoint público de cotizaciones.
+
+### `[[portfolio-service]]`
+- `GET /users/{userId}/portfolio`: devuelve saldo y tenencias.
+- `POST /users/{userId}/deposits`: registra ingresos en ARS.
+- Respuesta mínima: `balanceArs`, `positions[]`, `movementId`.
+
+### `[[orders-service]]`
+- `POST /orders/buy`: crea y resuelve una orden de compra.
+- `POST /orders/sell`: crea y registra una orden de venta.
+- Payload mínimo: `userId`, `symbol`, `quantity`, `priceLimit`, `side`.
+- Respuesta mínima: `orderId`, `status`, `matchedQuantity`, `remainingQuantity`.
+
+### `[[history-service]]`
+- `GET /users/{userId}/history`: historial completo de un usuario.
+- `GET /admin/history`: historial global para `ADMIN`.
+- `POST /events`: guarda cada operación resuelta o rechazada.
+
+### `[[keycloak]]`
+- Emite tokens OAuth2 y define roles `USER` y `ADMIN`.
+- Las rutas privadas dependen de sus claims para autorización.
+
+### Reglas de contrato que no conviene romper
+- Cotizaciones públicas sin token, pero el resto de rutas privadas con autenticación.
+- `orders-service` decide aceptación o rechazo en forma inmediata.
+- `history-service` solo registra trazas; no debería calcular reglas de negocio.
+- `portfolio-service` mantiene saldo y tenencias; `orders-service` orquesta la operación.
 
 ## 5. Plan de entrega por fases
 ### Fase 1 - Base del dominio y contratos
