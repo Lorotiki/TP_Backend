@@ -1,15 +1,17 @@
+COMPOSE = docker compose --env-file .env -f infra/docker-compose.yml
+
 up:
-	docker compose -f infra/docker-compose.yml up -d
+	$(COMPOSE) up -d
 
 down:
-	docker compose -f infra/docker-compose.yml down
+	$(COMPOSE) down
 
 logs:
-	docker compose -f infra/docker-compose.yml logs -f
+	$(COMPOSE) logs -f
 
 ps:
-	docker compose -f infra/docker-compose.yml ps
+	$(COMPOSE) ps
 
 reset:
-	docker compose -f infra/docker-compose.yml down -v
+	$(COMPOSE) down -v
 
