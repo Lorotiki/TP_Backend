@@ -45,34 +45,86 @@ Construir un backend de mercado de acciones con autenticación OAuth2 + Keycloak
 - `[[orders-service]]`: alta y resolución de órdenes de compra/venta.
 - `[[history-service]]`: auditoría e historial consultable.
 
-## 5. Plan de implementación por pasos
-1. Modelar entidades y casos de uso mínimos del dominio.
-2. Definir contratos entre servicios y endpoints públicos.
-3. Implementar seguridad con Keycloak y roles `USER` / `ADMIN`.
-4. Resolver consulta de cotizaciones con una API externa o datos mockeados.
-5. Implementar portfolio y saldo con operaciones en ARS.
-6. Implementar alta y validación de órdenes de venta.
-7. Implementar el motor de emparejamiento para órdenes de compra.
-8. Registrar cada operación en el historial.
-9. Montar Docker Compose con todos los servicios y dependencias.
-10. Preparar colección Postman para demostración final.
+## 5. Plan de entrega por fases
+### Fase 1 - Base del dominio y contratos
+**Objetivo:** dejar definidos los casos de uso y la interfaz entre servicios.
+
+**Tareas:**
+- Modelar entidades y casos de uso mínimos del dominio.
+- Definir contratos entre servicios y endpoints públicos.
+
+**Criterio de salida:**
+- Los servicios y sus responsabilidades están claros.
+- Los endpoints principales ya están documentados.
+
+**Avance esperado:** `1/5`
+
+### Fase 2 - Seguridad e infraestructura
+**Objetivo:** tener autenticación, autorización y entorno ejecutable.
+
+**Tareas:**
+- Implementar seguridad con Keycloak y roles `USER` / `ADMIN`.
+- Montar Docker Compose con la base del sistema.
+
+**Criterio de salida:**
+- El acceso privado queda protegido.
+- El proyecto levanta con infraestructura reproducible.
+
+**Avance esperado:** `2/5`
+
+### Fase 3 - Cotizaciones y portfolio
+**Objetivo:** exponer cotizaciones y gestionar saldo/tenencias.
+
+**Tareas:**
+- Resolver consulta de cotizaciones con una API externa o datos mockeados.
+- Implementar portfolio y saldo con operaciones en ARS.
+
+**Criterio de salida:**
+- Se puede consultar una cotización pública.
+- Se puede ver el estado de cuenta de un usuario.
+
+**Avance esperado:** `3/5`
+
+### Fase 4 - Órdenes y matching
+**Objetivo:** registrar órdenes y resolver compras/ventas con reglas de negocio.
+
+**Tareas:**
+- Implementar alta y validación de órdenes de venta.
+- Implementar el motor de emparejamiento para órdenes de compra.
+
+**Criterio de salida:**
+- Una orden válida se acepta o rechaza en forma inmediata.
+- Se respetan cantidad, precio y remanentes.
+
+**Avance esperado:** `4/5`
+
+### Fase 5 - Historial y demo final
+**Objetivo:** dejar trazabilidad completa y preparar la exposición.
+
+**Tareas:**
+- Registrar cada operación en el historial.
+- Preparar colección Postman para demostración final.
+
+**Criterio de salida:**
+- El usuario ve su historial y `ADMIN` ve el global.
+- La demo reproduce los casos clave sin intervención manual.
+
+**Avance esperado:** `5/5`
 
 ## 6. Commit incremental recomendado
-Hacer commits pequeños, uno por hito funcional, para poder volver atrás y explicar avances en la defensa.
+Hacer commits chicos por fase completa, no por cada microtarea.
 
 ### Secuencia sugerida de commits
-1. `chore: base del proyecto y arquitectura inicial`
-2. `feat: gateway y seguridad con keycloak`
-3. `feat: market data y cotizaciones públicas`
-4. `feat: portfolio y saldo en ars`
-5. `feat: orders con matching síncrono`
-6. `feat: history y auditoria de operaciones`
-7. `chore: docker compose y coleccion postman`
+1. `chore: base del proyecto y contratos iniciales`
+2. `feat: seguridad e infraestructura del entorno`
+3. `feat: cotizaciones y portfolio`
+4. `feat: orders y matching`
+5. `feat: historial y preparación de demo`
 
 ### Regla práctica de trabajo
-- Después de cada tarea terminada: validar, commitear y dejar el plan actualizado.
-- Si una tarea crece demasiado: partirla en dos commits antes de seguir.
-- No mezclar infraestructura, negocio y documentación en un mismo commit si se puede evitar.
+- Al cerrar una fase: validar, commitear y marcar el avance.
+- Si una fase queda grande: dividirla antes de empezar la siguiente.
+- Evitar mezclar cambios de infraestructura, negocio y documentación.
 
 ## 7. Reglas clave del matching
 - No comprar si no existe oferta compatible.
@@ -99,16 +151,15 @@ Hacer commits pequeños, uno por hito funcional, para poder volver atrás y expl
 - Fase 5: historial, pruebas y demo.
 
 ## 11. Checklist de avance
-- [ ] Definir microservicios y responsabilidades.
-- [ ] Definir modelo de datos y persistencia.
-- [ ] Configurar Keycloak y roles.
-- [ ] Implementar cotizaciones públicas.
-- [ ] Implementar portfolio y saldo.
-- [ ] Implementar órdenes de compra/venta.
-- [ ] Implementar matching síncrono.
-- [ ] Registrar historial de operaciones.
-- [ ] Crear Docker Compose.
-- [ ] Preparar Postman y guión de exposición.
+- [ ] Fase 1 completa: dominio y contratos.
+- [ ] Fase 2 completa: seguridad e infraestructura.
+- [ ] Fase 3 completa: cotizaciones y portfolio.
+- [ ] Fase 4 completa: órdenes y matching.
+- [ ] Fase 5 completa: historial y demo.
+
+### Indicador simple de progreso
+- `x/5 fases completadas`
+- `x/5 entregables principales listos`
 
 ## 12. Cómo reutilizar este archivo en otro proyecto
 - Reemplazar `[[...]]` por nombres reales del dominio.
