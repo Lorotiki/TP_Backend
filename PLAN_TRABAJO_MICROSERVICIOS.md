@@ -257,3 +257,99 @@ Hacer commits chicos por fase completa, no por cada microtarea.
 - `tpi-history-service` no decide reglas de negocio; solo persiste eventos.
 - `tpi-portfolio-service` no ejecuta matching; solo mantiene estado de cuenta.
 
+## 17. Estrategia de base de datos
+- Mantener una base por microservicio (`portfolio`, `orders`, `history`) para reducir acoplamiento.
+- Evitar joins cross-service; la integración entre dominios se hace por API/eventos.
+- Mantener `user_id` como referencia externa estable (emitida por identidad), no FK entre servicios.
+- Usar migraciones versionadas por servicio para evolución controlada.
+
+## 18. Ubicación del script iniciador de base
+La inicialización queda en `tpi-platform`, dentro de infraestructura compartida.
+
+### Estructura recomendada
+- `tpi-platform/infra/docker-compose.yml`
+- `tpi-platform/infra/db/portfolio/init/01_schema.sql`
+- `tpi-platform/infra/db/portfolio/init/02_tables.sql`
+- `tpi-platform/infra/db/portfolio/init/03_seed.sql`
+- `tpi-platform/infra/db/orders/init/01_schema.sql`
+- `tpi-platform/infra/db/orders/init/02_tables.sql`
+- `tpi-platform/infra/db/orders/init/03_seed.sql`
+- `tpi-platform/infra/db/history/init/01_schema.sql`
+- `tpi-platform/infra/db/history/init/02_tables.sql`
+- `tpi-platform/infra/db/history/init/03_seed.sql`
+
+### Convención de carga
+- `01_schema.sql`: creación de schema y extensiones necesarias.
+- `02_tables.sql`: tablas, índices y constraints.
+- `03_seed.sql`: datos iniciales para demo/pruebas.
+
+## 19. Estructura mínima de BD para crear modelos
+### `portfolio-service`
+**Tabla `accounts`**
+- `id` (uuid, pk)
+- `user_id` (varchar, unique)
+- `balance_ars` (numeric(18,2), not null)
+- `created_at`, `updated_at` (timestamp)
+
+**Tabla `positions`**
+- `id` (uuid, pk)
+- `account_id` (uuid)
+- `symbol` (varchar)
+- `quantity` (numeric(18,4), not null)
+- `avg_price_ars` (numeric(18,4), not null)
+- `updated_at` (timestamp)
+- unique `(account_id, symbol)`
+
+**Tabla `cash_movements`**
+- `id` (uuid, pk)
+- `account_id` (uuid)
+- `type` (`DEPOSIT`, `BUY_DEBIT`, `SELL_CREDIT`)
+- `amount_ars` (numeric(18,2), not null)
+- `reference_id` (varchar)
+- `created_at` (timestamp)
+
+### `orders-service`
+**Tabla `orders`**
+- `id` (uuid, pk)
+- `user_id` (varchar, not null)
+- `symbol` (varchar, not null)
+- `side` (`BUY`, `SELL`)
+- `quantity` (numeric(18,4), not null)
+- `remaining_quantity` (numeric(18,4), not null)
+- `limit_price` (numeric(18,4), not null)
+- `status` (`PENDING`, `PARTIALLY_FILLED`, `FILLED`, `REJECTED`, `CANCELLED`, `EXPIRED`)
+- `created_at`, `updated_at` (timestamp)
+
+**Tabla `order_fills`**
+- `id` (uuid, pk)
+- `buy_order_id` (uuid)
+- `sell_order_id` (uuid)
+- `symbol` (varchar)
+- `quantity` (numeric(18,4), not null)
+- `price_ars` (numeric(18,4), not null)
+- `executed_at` (timestamp)
+
+### `history-service`
+**Tabla `history_events`**
+- `event_id` (uuid, pk)
+- `event_type` (varchar)
+- `user_id` (varchar)
+- `order_id` (uuid)
+- `correlation_id` (uuid)
+- `causation_id` (uuid)
+- `payload_json` (jsonb)
+- `occurred_at` (timestamp)
+
+**Opcional: tabla `user_operation_view` (lectura rápida)**
+- `id` (uuid, pk)
+- `user_id` (varchar)
+- `operation_type` (varchar)
+- `symbol` (varchar)
+- `amount_ars` (numeric(18,2))
+- `created_at` (timestamp)
+
+### Criterio de IDs y consistencia
+- Usar UUID para entidades principales.
+- Registrar `correlation_id` para trazar una operación completa entre servicios.
+- Si hay reintentos/eventos, usar `idempotency_key` en escritura para evitar duplicados.
+
