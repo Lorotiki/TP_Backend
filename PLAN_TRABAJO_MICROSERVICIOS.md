@@ -196,3 +196,64 @@ Hacer commits chicos por fase completa, no por cada microtarea.
 - Ajustar la lista de microservicios según el contexto.
 - Cambiar reglas de negocio, seguridad y entregables según el enunciado nuevo.
 
+## 13. Mapa de implementación real (sugerido)
+### Nombres concretos de repos/servicios
+- `tpi-platform`: orquestación local, compose y documentación de arranque.
+- `tpi-keycloak-config`: realm, clientes, usuarios de prueba y roles.
+- `tpi-api-gateway`: punto de entrada único, routing y validación JWT.
+- `tpi-market-data-service`: cotizaciones y conversión de moneda.
+- `tpi-portfolio-service`: saldo en ARS, tenencias y depósitos.
+- `tpi-orders-service`: creación y resolución síncrona de buy/sell.
+- `tpi-history-service`: auditoría e historial por usuario/global.
+
+### Orden exacto de creación recomendado
+1. `tpi-platform`
+2. `tpi-keycloak-config`
+3. `tpi-api-gateway`
+4. `tpi-market-data-service`
+5. `tpi-portfolio-service`
+6. `tpi-orders-service`
+7. `tpi-history-service`
+
+## 14. Entregable mínimo por servicio
+- `tpi-platform`: `docker-compose.yml` funcional + `README` de levantado.
+- `tpi-keycloak-config`: export de realm con roles `USER` y `ADMIN`.
+- `tpi-api-gateway`: rutas públicas/privadas funcionando con validación de token.
+- `tpi-market-data-service`: `GET /quotes/{symbol}` operativo con respuesta estable.
+- `tpi-portfolio-service`: `GET /users/{userId}/portfolio` y `POST /users/{userId}/deposits`.
+- `tpi-orders-service`: `POST /orders/buy` y `POST /orders/sell` con respuesta inmediata.
+- `tpi-history-service`: `POST /events`, `GET /users/{userId}/history`, `GET /admin/history`.
+
+## 15. Definition of Done por fase
+### Fase 1 (1/5)
+- Contratos de API definidos para todos los servicios.
+- Responsabilidades por servicio documentadas y sin solapamientos.
+- Reglas de matching y seguridad validadas por el equipo.
+
+### Fase 2 (2/5)
+- Keycloak operativo con roles y clientes configurados.
+- Gateway validando JWT en rutas privadas.
+- Entorno local levantando con compose sin intervención manual.
+
+### Fase 3 (3/5)
+- Cotización pública respondiendo con símbolo, moneda y timestamp.
+- Portfolio devolviendo saldo/tenencias correctamente.
+- Depósitos impactando el saldo en ARS.
+
+### Fase 4 (4/5)
+- Buy/sell aceptan o rechazan en forma inmediata.
+- Matching respeta precio, cantidad y remanentes.
+- Portfolio se actualiza de forma consistente tras la operación.
+
+### Fase 5 (5/5)
+- Cada operación genera evento de historial.
+- Usuario consulta su historial completo.
+- `ADMIN` consulta historial global.
+- Colección Postman final lista para exposición.
+
+## 16. Dependencias y puntos de integración
+- `tpi-api-gateway` depende de Keycloak y enruta a todos los servicios.
+- `tpi-orders-service` depende de `tpi-market-data-service`, `tpi-portfolio-service` y `tpi-history-service`.
+- `tpi-history-service` no decide reglas de negocio; solo persiste eventos.
+- `tpi-portfolio-service` no ejecuta matching; solo mantiene estado de cuenta.
+
