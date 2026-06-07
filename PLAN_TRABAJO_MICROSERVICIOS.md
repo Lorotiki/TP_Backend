@@ -180,15 +180,15 @@ Hacer commits chicos por fase completa, no por cada microtarea.
 - Fase 5: historial, pruebas y demo.
 
 ## 11. Checklist de avance
-- [ ] Fase 1 completa: dominio y contratos.
-- [ ] Fase 2 completa: seguridad e infraestructura.
+- [x] Fase 1 completa: dominio y contratos.
+- [x] Fase 2 completa: seguridad e infraestructura.
 - [ ] Fase 3 completa: cotizaciones y portfolio.
 - [ ] Fase 4 completa: órdenes y matching.
 - [ ] Fase 5 completa: historial y demo.
 
 ### Indicador simple de progreso
-- `x/5 fases completadas`
-- `x/5 entregables principales listos`
+- `2/5 fases completadas`
+- `2/5 entregables principales listos`
 
 ## 12. Cómo reutilizar este archivo en otro proyecto
 - Reemplazar `[[...]]` por nombres reales del dominio.
