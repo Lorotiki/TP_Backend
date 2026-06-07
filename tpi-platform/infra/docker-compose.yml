@@ -1,0 +1,69 @@
+services:
+  portfolio-db:
+    image: postgres:16-alpine
+    container_name: portfolio-db
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      POSTGRES_DB: ${PORTFOLIO_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${PORTFOLIO_DB_PORT}:5432"
+    volumes:
+      - portfolio-db-data:/var/lib/postgresql/data
+      - ./db/portfolio/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${PORTFOLIO_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  orders-db:
+    image: postgres:16-alpine
+    container_name: orders-db
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      POSTGRES_DB: ${ORDERS_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${ORDERS_DB_PORT}:5432"
+    volumes:
+      - orders-db-data:/var/lib/postgresql/data
+      - ./db/orders/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${ORDERS_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  history-db:
+    image: postgres:16-alpine
+    container_name: history-db
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      POSTGRES_DB: ${HISTORY_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${HISTORY_DB_PORT}:5432"
+    volumes:
+      - history-db-data:/var/lib/postgresql/data
+      - ./db/history/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${HISTORY_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  portfolio-db-data:
+  orders-db-data:
+  history-db-data:
+
