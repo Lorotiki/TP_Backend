@@ -1,0 +1,69 @@
+{
+  "realm": "tpi",
+  "enabled": true,
+  "publicClient": false,
+  "clientAuthenticatorType": "client-secret",
+  "defaultRoles": ["offline_access", "user_default"],
+  "roles": {
+    "realm": [
+      {
+        "name": "USER",
+        "description": "Usuario regular del sistema",
+        "composite": false
+      },
+      {
+        "name": "ADMIN",
+        "description": "Administrador con visibilidad global",
+        "composite": false
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "api-gateway",
+      "name": "API Gateway",
+      "description": "Cliente técnico para validar JWT",
+      "enabled": true,
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "api-gateway-secret-change-me",
+      "redirectUris": [
+        "http://localhost:8080/callback",
+        "http://127.0.0.1:8080/callback"
+      ],
+      "webOrigins": [
+        "http://localhost:*",
+        "http://127.0.0.1:*"
+      ],
+      "protocolMappers": [
+        {
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "protocol": "openid-connect",
+          "name": "realm roles",
+          "config": {
+            "usermodel.realmRoleAttributeName": "roles",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "claim.name": "roles",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "protocolMapper": "oidc-usermodel-basic-attributes",
+          "protocol": "openid-connect",
+          "name": "basic attributes",
+          "config": {
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "import": [
+    "REALM",
+    "CLIENTS",
+    "ROLES"
+  ]
+}
+
