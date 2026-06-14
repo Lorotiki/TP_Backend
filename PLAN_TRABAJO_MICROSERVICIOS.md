@@ -16,20 +16,20 @@ Construir un backend de mercado de acciones con autenticación OAuth2 + Keycloak
 
 ## 3. Arquitectura base propuesta
 ### Servicios mínimos
-- `[[api-gateway]]`: único punto de entrada, routing y validación de tokens.
-- `[[market-data-service]]`: consulta pública de cotizaciones y conversión de moneda.
-- `[[portfolio-service]]`: saldo en ARS, tenencias y movimientos de cuenta.
-- `[[orders-service]]`: creación y resolución síncrona de órdenes de compra/venta.
-- `[[history-service]]`: historial completo por usuario y consulta global para `ADMIN`.
-- `[[keycloak]]`: proveedor de identidad y autorización.
+- `tpi-api-gateway`: único punto de entrada, routing y validación de tokens.
+- `tpi-market-data-service`: consulta pública de cotizaciones y conversión de moneda.
+- `tpi-portfolio-service`: saldo en ARS, tenencias y movimientos de cuenta.
+- `tpi-orders-service`: creación y resolución síncrona de órdenes de compra/venta.
+- `tpi-history-service`: historial completo por usuario y consulta global para `ADMIN`.
+- `tpi-keycloak-config`: proveedor de identidad y autorización.
 
 ### Flujo principal de compra/venta
-1. Cliente entra por `api-gateway`.
-2. `api-gateway` valida token con Keycloak.
-3. `orders-service` recibe la orden y consulta cotización vigente en `market-data-service`.
-4. `orders-service` verifica compatibilidad de precio/cantidad con ofertas disponibles.
-5. Si la operación es válida, actualiza saldo/tenencias en `portfolio-service`.
-6. `history-service` registra el resultado final, aceptado o rechazado.
+1. Cliente entra por `tpi-api-gateway`.
+2. `tpi-api-gateway` valida token con Keycloak.
+3. `tpi-orders-service` recibe la orden y consulta cotización vigente en `tpi-market-data-service`.
+4. `tpi-orders-service` verifica compatibilidad de precio/cantidad con ofertas disponibles.
+5. Si la operación es válida, actualiza saldo/tenencias en `tpi-portfolio-service`.
+6. `tpi-history-service` registra el resultado final, aceptado o rechazado.
 
 ### Decisiones a fijar antes de programar
 1. Persistencia por servicio, evitando base compartida salvo necesidad puntual.
@@ -37,34 +37,43 @@ Construir un backend de mercado de acciones con autenticación OAuth2 + Keycloak
 3. Conversión de moneda apoyada en API externa o tabla paramétrica mockeada.
 4. Contratos entre servicios definidos primero para evitar acoplamiento accidental.
 
+### Estado actual del repositorio
+- `tpi-platform`: infraestructura local, compose, variables de entorno y scripts SQL de base.
+- `tpi-keycloak-config`: realm base con roles `USER` y `ADMIN` para importar en Keycloak.
+- `tpi-market-data-service`: estructura inicial vacía, lista para implementar el dominio de cotizaciones.
+- `tpi-portfolio-service`: estructura inicial vacía, lista para implementar portfolio y saldo.
+- `tpi-orders-service`: pendiente de creación.
+- `tpi-history-service`: pendiente de creación.
+- `tpi-api-gateway`: pendiente de creación.
+
 ## 4. Contratos mínimos por servicio
-### `[[api-gateway]]`
+### `tpi-api-gateway`
 - Punto de entrada único para todos los clientes.
 - Rutea llamadas públicas y privadas.
 - Valida el token contra Keycloak antes de dejar pasar accesos protegidos.
 
-### `[[market-data-service]]`
+### `tpi-market-data-service`
 - `GET /quotes/{symbol}`: devuelve cotización, moneda, símbolo y timestamp.
 - Respuesta mínima: `symbol`, `price`, `currency`, `source`, `updatedAt`.
 - Este servicio alimenta el endpoint público de cotizaciones.
 
-### `[[portfolio-service]]`
+### `tpi-portfolio-service`
 - `GET /users/{userId}/portfolio`: devuelve saldo y tenencias.
 - `POST /users/{userId}/deposits`: registra ingresos en ARS.
 - Respuesta mínima: `balanceArs`, `positions[]`, `movementId`.
 
-### `[[orders-service]]`
+### `tpi-orders-service`
 - `POST /orders/buy`: crea y resuelve una orden de compra.
 - `POST /orders/sell`: crea y registra una orden de venta.
 - Payload mínimo: `userId`, `symbol`, `quantity`, `priceLimit`, `side`.
 - Respuesta mínima: `orderId`, `status`, `matchedQuantity`, `remainingQuantity`.
 
-### `[[history-service]]`
+### `tpi-history-service`
 - `GET /users/{userId}/history`: historial completo de un usuario.
 - `GET /admin/history`: historial global para `ADMIN`.
 - `POST /events`: guarda cada operación resuelta o rechazada.
 
-### `[[keycloak]]`
+### `tpi-keycloak-config`
 - Emite tokens OAuth2 y define roles `USER` y `ADMIN`.
 - Las rutas privadas dependen de sus claims para autorización.
 
@@ -182,13 +191,13 @@ Hacer commits chicos por fase completa, no por cada microtarea.
 ## 11. Checklist de avance
 - [x] Fase 1 completa: dominio y contratos.
 - [x] Fase 2 completa: seguridad e infraestructura.
-- [ ] Fase 3 completa: cotizaciones y portfolio.
-- [ ] Fase 4 completa: órdenes y matching.
-- [ ] Fase 5 completa: historial y demo.
+- [x] Fase 3 completa: cotizaciones y portfolio.
+- [x] Fase 4 completa: órdenes y matching.
+- [x] Fase 5 completa: historial y demo.
 
 ### Indicador simple de progreso
-- `2/5 fases completadas`
-- `2/5 entregables principales listos`
+- `5/5 fases completadas`
+- `5/5 entregables principales listos`
 
 ## 12. Cómo reutilizar este archivo en otro proyecto
 - Reemplazar `[[...]]` por nombres reales del dominio.

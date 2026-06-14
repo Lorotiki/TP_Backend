@@ -108,6 +108,111 @@ services:
       - "start-dev"
       - "--import-realm"
 
+  market-data-service:
+    build:
+      context: ../..
+      dockerfile: tpi-market-data-service/Dockerfile
+    container_name: market-data-service
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    ports:
+      - "${MARKET_DATA_PORT}:8081"
+    depends_on:
+      keycloak:
+        condition: service_started
+
+  portfolio-service:
+    build:
+      context: ../..
+      dockerfile: tpi-portfolio-service/Dockerfile
+    container_name: portfolio-service
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      PORTFOLIO_DB_URL: ${PORTFOLIO_DB_URL}
+      PORTFOLIO_DB_USER: ${PORTFOLIO_DB_USER}
+      PORTFOLIO_DB_PASSWORD: ${PORTFOLIO_DB_PASSWORD}
+    ports:
+      - "${PORTFOLIO_PORT}:8082"
+    depends_on:
+      portfolio-db:
+        condition: service_healthy
+
+  history-service:
+    build:
+      context: ../..
+      dockerfile: tpi-history-service/Dockerfile
+    container_name: history-service
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      HISTORY_DB_URL: ${HISTORY_DB_URL}
+      HISTORY_DB_USER: ${HISTORY_DB_USER}
+      HISTORY_DB_PASSWORD: ${HISTORY_DB_PASSWORD}
+    ports:
+      - "${HISTORY_PORT}:8084"
+    depends_on:
+      history-db:
+        condition: service_healthy
+
+  orders-service:
+    build:
+      context: ../..
+      dockerfile: tpi-orders-service/Dockerfile
+    container_name: orders-service
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      ORDERS_DB_URL: ${ORDERS_DB_URL}
+      ORDERS_DB_USER: ${ORDERS_DB_USER}
+      ORDERS_DB_PASSWORD: ${ORDERS_DB_PASSWORD}
+      MARKET_DATA_BASE_URL: ${MARKET_DATA_BASE_URL}
+      PORTFOLIO_BASE_URL: ${PORTFOLIO_BASE_URL}
+      HISTORY_BASE_URL: ${HISTORY_BASE_URL}
+    ports:
+      - "${ORDERS_PORT}:8083"
+    depends_on:
+      orders-db:
+        condition: service_healthy
+      market-data-service:
+        condition: service_started
+      portfolio-service:
+        condition: service_started
+      history-service:
+        condition: service_started
+
+  api-gateway:
+    build:
+      context: ../..
+      dockerfile: tpi-api-gateway/Dockerfile
+    container_name: api-gateway
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
+      MARKET_DATA_URI: http://market-data-service:8081
+      PORTFOLIO_URI: http://portfolio-service:8082
+      ORDERS_URI: http://orders-service:8083
+      HISTORY_URI: http://history-service:8084
+    ports:
+      - "${API_GATEWAY_PORT}:8085"
+    depends_on:
+      keycloak:
+        condition: service_started
+      market-data-service:
+        condition: service_started
+      portfolio-service:
+        condition: service_started
+      orders-service:
+        condition: service_started
+      history-service:
+        condition: service_started
+
 volumes:
   portfolio-db-data:
   orders-db-data:

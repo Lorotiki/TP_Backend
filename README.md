@@ -1,93 +1,141 @@
 # Tp_Backned_2026
 
+Repositorio del TPI de Backend orientado a microservicios para mercado de acciones.
 
+## Qué incluye hoy
+- `tpi-platform`: infraestructura local, `docker-compose.yml`, variables de entorno, bases PostgreSQL por servicio y comandos de orquestación.
+- `tpi-keycloak-config`: realm base de Keycloak con roles `USER` y `ADMIN`.
+- `tpi-api-gateway`: gateway con routing y validación JWT para rutas privadas.
+- `tpi-market-data-service`: cotizaciones públicas con catálogo estable de símbolos.
+- `tpi-portfolio-service`: portfolio, saldo, depósitos y aplicación interna de trades.
+- `tpi-orders-service`: alta de órdenes, matching síncrono y coordinación con portfolio/historial.
+- `tpi-history-service`: auditoría e historial por usuario/global.
+- `PLAN_TRABAJO_MICROSERVICIOS.md`: plan de trabajo, fases y contratos del sistema.
+- `postman_collection_tpi_backend_2026.json`: colección de demo para la exposición.
 
-## Getting started
+## Estado actual
+- Fase 1: completa.
+- Fase 2: completa.
+- Fase 3: completa.
+- Fase 4: completa.
+- Fase 5: completa.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-* [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
-
+## Estructura del repo
+```text
+tp_backned_2026/
+├── PLAN_TRABAJO_MICROSERVICIOS.md
+├── README.md
+├── pom.xml
+├── postman_collection_tpi_backend_2026.json
+├── tpi-api-gateway/
+├── tpi-history-service/
+├── tpi-keycloak-config/
+├── tpi-market-data-service/
+├── tpi-orders-service/
+├── tpi-platform/
+└── tpi-portfolio-service/
 ```
-cd existing_repo
-git remote add origin https://labsys.frc.utn.edu.ar/gitlab/ruiz402586/tp_backned_2026.git
-git branch -M main
-git push -uf origin main
+
+## Servicios y puertos
+- `tpi-market-data-service`: `8081`
+- `tpi-portfolio-service`: `8082`
+- `tpi-orders-service`: `8083`
+- `tpi-history-service`: `8084`
+- `tpi-api-gateway`: `8085`
+- `keycloak`: `8080`
+
+## Arranque rápido de la infraestructura
+Requisitos:
+- Docker
+- Docker Compose plugin (`docker compose`)
+- Java 21
+- Maven 3.9+
+
+Pasos:
+```bash
+cd /home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-platform
+cp .env.example .env
+make test
+make up-build
+make ps
 ```
 
-## Integrate with your tools
+### Ver logs
+```bash
+make logs
+```
 
-* [Set up project integrations](https://labsys.frc.utn.edu.ar/gitlab/ruiz402586/tp_backned_2026/-/settings/integrations)
+### Bajar servicios
+```bash
+make down
+```
 
-## Collaborate with your team
+### Reiniciar limpiando volúmenes
+```bash
+make reset
+```
 
-* [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+## Ejecución local sin Docker
+Desde la raíz del repo:
+```bash
+mvn test
+```
 
-## Test and Deploy
+Levantar infraestructura y luego servicios por separado si querés depurar:
+```bash
+cd /home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-platform
+cp .env.example .env
+make up
 
-Use the built-in continuous integration in GitLab.
+cd /home/leandro/Documentos/UTN/Backend/tp_backned_2026
+mvn -pl tpi-market-data-service spring-boot:run
+mvn -pl tpi-portfolio-service spring-boot:run
+mvn -pl tpi-history-service spring-boot:run
+mvn -pl tpi-orders-service spring-boot:run
+mvn -pl tpi-api-gateway spring-boot:run
+```
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+## Acceso a Keycloak
+- URL: `http://localhost:8080`
+- Admin: `admin`
+- Password: `admin`
+- Realm: `tpi`
+- Roles: `USER`, `ADMIN`
 
-***
+## Endpoints principales
+Público:
+- `GET /quotes/{symbol}`
 
-# Editing this README
+Privados:
+- `GET /users/{userId}/portfolio`
+- `POST /users/{userId}/deposits`
+- `POST /orders/sell`
+- `POST /orders/buy`
+- `GET /users/{userId}/orders`
+- `GET /users/{userId}/history`
+- `GET /admin/history`
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+## Reglas de negocio implementadas
+- La cotización es pública y estable por símbolo.
+- El portfolio crea la cuenta on-demand si el usuario todavía no existe.
+- Los depósitos impactan el saldo en ARS.
+- Las órdenes de venta validan tenencias disponibles.
+- Las órdenes de compra validan saldo y hacen matching síncrono con ventas abiertas compatibles.
+- Si no hay oferta compatible, la orden de compra se rechaza de inmediato.
+- Cada resultado de orden queda auditado en historial.
 
-## Suggestions for a good README
+## Demo sugerida
+1. Obtener un token de Keycloak para un usuario con rol `USER`.
+2. Consultar `GET /quotes/NVDA` desde el gateway.
+3. Consultar el portfolio de `user-demo-1`.
+4. Registrar una venta para `user-demo-2`.
+5. Ejecutar una compra para `user-demo-1`.
+6. Consultar historial por usuario.
+7. Consultar historial global con un token `ADMIN`.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+La colección `postman_collection_tpi_backend_2026.json` ya trae esos requests.
 
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## Notas
+- Los scripts SQL de `tpi-platform/infra/db/*/init` se ejecutan al crear los volúmenes por primera vez.
+- Si modificás los scripts, reiniciá con `make reset` y luego `make up`.
+- Las pruebas automáticas hoy validan cotizaciones, portfolio, historial y carga de contexto del gateway/orders.
