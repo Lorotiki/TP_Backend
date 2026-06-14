@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.tpi.portfolio.PortfolioServiceTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.685 s -- in com.tpi.portfolio.PortfolioServiceTest

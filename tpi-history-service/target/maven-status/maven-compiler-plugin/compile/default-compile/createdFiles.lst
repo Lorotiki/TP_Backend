@@ -1,0 +1,9 @@
+com/tpi/history/UserOperationViewRepository.class
+com/tpi/history/HistoryEvent.class
+com/tpi/history/HistoryEventResponse.class
+com/tpi/history/HistoryApplication.class
+com/tpi/history/HistoryService.class
+com/tpi/history/HistoryController.class
+com/tpi/history/HistoryEventRepository.class
+com/tpi/history/HistoryEventRequest.class
+com/tpi/history/UserOperationView.class

@@ -1,0 +1,15 @@
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-orders-service/src/main/java/com/tpi/orders/HistoryEventClientRequest.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-orders-service/src/main/java/com/tpi/orders/OrderEntity.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-orders-service/src/main/java/com/tpi/orders/OrderFill.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-orders-service/src/main/java/com/tpi/orders/OrderFillRepository.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-orders-service/src/main/java/com/tpi/orders/OrderRepository.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-orders-service/src/main/java/com/tpi/orders/OrderRequest.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-orders-service/src/main/java/com/tpi/orders/OrderResponse.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-orders-service/src/main/java/com/tpi/orders/OrdersApplication.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-orders-service/src/main/java/com/tpi/orders/OrdersController.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-orders-service/src/main/java/com/tpi/orders/OrdersService.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-orders-service/src/main/java/com/tpi/orders/PortfolioClientPositionResponse.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-orders-service/src/main/java/com/tpi/orders/PortfolioClientResponse.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-orders-service/src/main/java/com/tpi/orders/PortfolioTradeClientRequest.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-orders-service/src/main/java/com/tpi/orders/QuoteClientResponse.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-orders-service/src/main/java/com/tpi/orders/RestClientsConfig.java

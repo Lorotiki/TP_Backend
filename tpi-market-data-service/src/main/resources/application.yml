@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: tpi-market-data-service
+
+server:
+  port: 8081
+

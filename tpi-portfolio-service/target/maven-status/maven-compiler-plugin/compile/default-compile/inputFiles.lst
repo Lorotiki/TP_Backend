@@ -1,0 +1,14 @@
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-portfolio-service/src/main/java/com/tpi/portfolio/Account.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-portfolio-service/src/main/java/com/tpi/portfolio/AccountRepository.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-portfolio-service/src/main/java/com/tpi/portfolio/CashMovement.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-portfolio-service/src/main/java/com/tpi/portfolio/CashMovementRepository.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-portfolio-service/src/main/java/com/tpi/portfolio/DepositRequest.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-portfolio-service/src/main/java/com/tpi/portfolio/DepositResponse.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-portfolio-service/src/main/java/com/tpi/portfolio/PortfolioApplication.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-portfolio-service/src/main/java/com/tpi/portfolio/PortfolioController.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-portfolio-service/src/main/java/com/tpi/portfolio/PortfolioResponse.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-portfolio-service/src/main/java/com/tpi/portfolio/PortfolioService.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-portfolio-service/src/main/java/com/tpi/portfolio/Position.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-portfolio-service/src/main/java/com/tpi/portfolio/PositionRepository.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-portfolio-service/src/main/java/com/tpi/portfolio/PositionResponse.java
+/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-portfolio-service/src/main/java/com/tpi/portfolio/TradeAdjustmentRequest.java

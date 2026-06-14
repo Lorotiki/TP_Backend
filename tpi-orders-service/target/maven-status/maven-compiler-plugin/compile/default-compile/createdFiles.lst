@@ -1,0 +1,15 @@
+com/tpi/orders/OrderEntity.class
+com/tpi/orders/OrderRepository.class
+com/tpi/orders/OrderFillRepository.class
+com/tpi/orders/OrdersController.class
+com/tpi/orders/OrdersApplication.class
+com/tpi/orders/HistoryEventClientRequest.class
+com/tpi/orders/PortfolioTradeClientRequest.class
+com/tpi/orders/PortfolioClientResponse.class
+com/tpi/orders/OrderResponse.class
+com/tpi/orders/PortfolioClientPositionResponse.class
+com/tpi/orders/RestClientsConfig.class
+com/tpi/orders/OrdersService.class
+com/tpi/orders/OrderRequest.class
+com/tpi/orders/QuoteClientResponse.class
+com/tpi/orders/OrderFill.class

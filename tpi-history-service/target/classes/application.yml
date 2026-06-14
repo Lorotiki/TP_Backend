@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: tpi-history-service
+  datasource:
+    url: ${HISTORY_DB_URL:jdbc:postgresql://localhost:5435/history_db}
+    username: ${HISTORY_DB_USER:postgres}
+    password: ${HISTORY_DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        default_schema: history
+        jdbc:
+          time_zone: UTC
+    open-in-view: false
+
+server:
+  port: 8084
+

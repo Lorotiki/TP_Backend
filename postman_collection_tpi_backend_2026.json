@@ -1,0 +1,146 @@
+{
+  "info": {
+    "name": "TPI Backend 2026",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección base para demostrar cotizaciones, portfolio, órdenes e historial"
+  },
+  "variable": [
+    {
+      "key": "gatewayUrl",
+      "value": "http://localhost:8085"
+    },
+    {
+      "key": "portfolioUrl",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "ordersUrl",
+      "value": "http://localhost:8083"
+    },
+    {
+      "key": "historyUrl",
+      "value": "http://localhost:8084"
+    },
+    {
+      "key": "marketUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "accessToken",
+      "value": "PEGAR_TOKEN_AQUI"
+    }
+  ],
+  "item": [
+    {
+      "name": "Cotización pública NVDA",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{gatewayUrl}}/quotes/NVDA"
+      }
+    },
+    {
+      "name": "Consultar portfolio user-demo-1",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": "{{gatewayUrl}}/users/user-demo-1/portfolio"
+      }
+    },
+    {
+      "name": "Depositar saldo user-demo-1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amountArs\": 150000.00,\n  \"referenceId\": \"postman-deposit-1\"\n}"
+        },
+        "url": "{{gatewayUrl}}/users/user-demo-1/deposits"
+      }
+    },
+    {
+      "name": "Registrar orden de venta",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"user-demo-2\",\n  \"symbol\": \"NVDA\",\n  \"quantity\": 5.0000,\n  \"priceLimit\": 36000.0000\n}"
+        },
+        "url": "{{gatewayUrl}}/orders/sell"
+      }
+    },
+    {
+      "name": "Ejecutar orden de compra",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"user-demo-1\",\n  \"symbol\": \"NVDA\",\n  \"quantity\": 5.0000,\n  \"priceLimit\": 36500.0000\n}"
+        },
+        "url": "{{gatewayUrl}}/orders/buy"
+      }
+    },
+    {
+      "name": "Historial por usuario",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": "{{gatewayUrl}}/users/user-demo-1/history"
+      }
+    },
+    {
+      "name": "Historial global admin",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": "{{gatewayUrl}}/admin/history"
+      }
+    }
+  ]
+}
+
