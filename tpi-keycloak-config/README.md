@@ -15,3 +15,10 @@ Los archivos del realm se montan en `/opt/keycloak/data/import` para que Keycloa
 - El realm base se importa al iniciar Keycloak.
 - Los usuarios de prueba se crean manualmente en consola admin o via script aparte.
 
+
+
+## Qué cambié y por qué:
+Saqué defaultRoles, el campo import y los campos duplicados a nivel realm (publicClient, clientAuthenticatorType) porque no son válidos ahí; eran ruido sin función.
+api-gateway ahora tiene directAccessGrantsEnabled: false y serviceAccountsEnabled: true: no lo van a usar para loguear gente, solo queda configurado por si en algún momento necesitan que el gateway mismo llame a Keycloak (ej. introspección). Para validar tokens por firma ni siquiera necesita usar su secret en runtime.
+Agregué tpi-client, público, con directAccessGrantsEnabled: true. Este es el que va a usar Postman: le pegás al endpoint de token con grant_type=password, client_id=tpi-client, username, password, y te devuelve el JWT. Sin esto, no había forma de sacar un token para probar nada.
+El mapper de roles lo dejé con las claves estándar de Keycloak (multivalued: true es clave: sin eso, si un usuario tuviera dos roles podría no listarlos bien) y lo até a tpi-client, que es el que realmente emite tokens de usuarios.
