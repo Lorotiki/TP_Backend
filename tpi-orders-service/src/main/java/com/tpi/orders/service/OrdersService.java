@@ -1,6 +1,7 @@
 package com.tpi.orders.service;
 
 import com.tpi.orders.dto.*;
+import com.tpi.orders.entity.OrderEntity;
 import com.tpi.orders.repository.OrderFillRepository;
 import com.tpi.orders.repository.OrderRepository;
 
@@ -32,11 +33,11 @@ public class OrdersService {
     private final String historyBaseUrl;
 
     public OrdersService(OrderRepository orderRepository,
-                         OrderFillRepository orderFillRepository,
-                         RestTemplate restTemplate,
-                         @Value("${clients.market-data.base-url}") String marketDataBaseUrl,
-                         @Value("${clients.portfolio.base-url}") String portfolioBaseUrl,
-                         @Value("${clients.history.base-url}") String historyBaseUrl) {
+            OrderFillRepository orderFillRepository,
+            RestTemplate restTemplate,
+            @Value("${clients.market-data.base-url}") String marketDataBaseUrl,
+            @Value("${clients.portfolio.base-url}") String portfolioBaseUrl,
+            @Value("${clients.history.base-url}") String historyBaseUrl) {
         this.orderRepository = orderRepository;
         this.orderFillRepository = orderFillRepository;
         this.restTemplate = restTemplate;
@@ -168,10 +169,12 @@ public class OrdersService {
                 .toList();
     }
 
-    private void applyTradeToPortfolio(String userId, String side, String symbol, BigDecimal quantity, BigDecimal priceArs, String referenceId) {
+    private void applyTradeToPortfolio(String userId, String side, String symbol, BigDecimal quantity,
+            BigDecimal priceArs, String referenceId) {
         var request = new PortfolioTradeClientRequest(side, symbol, quantity, priceArs, referenceId);
         try {
-            restTemplate.postForEntity(portfolioBaseUrl + "/users/" + userId + "/portfolio/trades", request, Void.class);
+            restTemplate.postForEntity(portfolioBaseUrl + "/users/" + userId + "/portfolio/trades", request,
+                    Void.class);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "No se pudo actualizar portfolio-service", e);
         }
@@ -188,15 +191,13 @@ public class OrdersService {
         try {
             PortfolioClientResponse portfolio = restTemplate.getForObject(
                     portfolioBaseUrl + "/users/" + order.getUserId() + "/portfolio",
-                    PortfolioClientResponse.class
-            );
+                    PortfolioClientResponse.class);
 
             if (portfolio == null) {
                 log.warn("⚠️ Portfolio no encontrado para userId: {}", order.getUserId());
                 throw new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Portfolio no encontrado para el usuario"
-                );
+                        "Portfolio no encontrado para el usuario");
             }
 
             // Calcular monto requerido
@@ -215,9 +216,7 @@ public class OrdersService {
                         HttpStatus.BAD_REQUEST,
                         String.format(
                                 "Saldo insuficiente. Requerido: %s ARS, Disponible: %s ARS",
-                                requiredAmount, portfolio.balanceArs()
-                        )
-                );
+                                requiredAmount, portfolio.balanceArs()));
             }
 
             log.debug("✓ Balance validado correctamente");
@@ -226,14 +225,14 @@ public class OrdersService {
             log.error("Error validando balance: {}", e.getMessage(), e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error al validar saldo del usuario"
-            );
+                    "Error al validar saldo del usuario");
         }
     }
 
     private PortfolioClientResponse fetchPortfolio(String userId) {
         try {
-            return restTemplate.getForObject(portfolioBaseUrl + "/users/" + userId + "/portfolio", PortfolioClientResponse.class);
+            return restTemplate.getForObject(portfolioBaseUrl + "/users/" + userId + "/portfolio",
+                    PortfolioClientResponse.class);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "No se pudo consultar portfolio-service", e);
         }
@@ -248,11 +247,11 @@ public class OrdersService {
     }
 
     private void recordHistory(String eventType,
-                               OrderEntity order,
-                               BigDecimal matchedQuantity,
-                               BigDecimal remainingQuantity,
-                               BigDecimal priceArs,
-                               String message) {
+            OrderEntity order,
+            BigDecimal matchedQuantity,
+            BigDecimal remainingQuantity,
+            BigDecimal priceArs,
+            String message) {
         Map<String, Object> payload = new HashMap<>();
         payload.put("symbol", order.getSymbol());
         payload.put("side", order.getSide());
@@ -263,7 +262,8 @@ public class OrdersService {
         payload.put("amountArs", priceArs.multiply(matchedQuantity).setScale(2, RoundingMode.HALF_UP));
         payload.put("message", message);
 
-        var request = new HistoryEventClientRequest(UUID.randomUUID(), eventType, order.getUserId(), order.getId(), UUID.randomUUID(), null, payload);
+        var request = new HistoryEventClientRequest(UUID.randomUUID(), eventType, order.getUserId(), order.getId(),
+                UUID.randomUUID(), null, payload);
         try {
             restTemplate.postForEntity(historyBaseUrl + "/events", request, Void.class);
         } catch (Exception e) {
@@ -294,11 +294,12 @@ public class OrdersService {
     }
 
     private OrderResponse toResponse(OrderEntity order,
-                                     BigDecimal matchedQuantity,
-                                     BigDecimal remainingQuantity,
-                                     BigDecimal executionPriceArs,
-                                     String message) {
-        return new OrderResponse(order.getId(), order.getStatus(), matchedQuantity, remainingQuantity, executionPriceArs, message);
+            BigDecimal matchedQuantity,
+            BigDecimal remainingQuantity,
+            BigDecimal executionPriceArs,
+            String message) {
+        return new OrderResponse(order.getId(), order.getStatus(), matchedQuantity, remainingQuantity,
+                executionPriceArs, message);
     }
 
     /**
@@ -311,15 +312,13 @@ public class OrdersService {
         try {
             PortfolioClientResponse portfolio = restTemplate.getForObject(
                     portfolioBaseUrl + "/users/" + order.getUserId() + "/portfolio",
-                    PortfolioClientResponse.class
-            );
+                    PortfolioClientResponse.class);
 
             if (portfolio == null) {
                 log.warn("⚠️ Portfolio no encontrado para userId: {}", order.getUserId());
                 throw new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Portfolio no encontrado para el usuario"
-                );
+                        "Portfolio no encontrado para el usuario");
             }
 
             // Buscar la posición del símbolo
@@ -333,22 +332,19 @@ public class OrdersService {
                         order.getUserId(), order.getSymbol());
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
-                        "No tiene acciones de " + order.getSymbol() + " para vender"
-                );
+                        "No tiene acciones de " + order.getSymbol() + " para vender");
             }
 
             if (position.quantity().compareTo(order.getQuantity()) < 0) {
                 log.warn("❌ Cantidad insuficiente de acciones: usuario={}, symbol={}, " +
-                                "requerida={}, disponible={}",
+                        "requerida={}, disponible={}",
                         order.getUserId(), order.getSymbol(),
                         order.getQuantity(), position.quantity());
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
                         String.format(
                                 "Cantidad insuficiente de %s. Tiene: %s, quiere vender: %s",
-                                order.getSymbol(), position.quantity(), order.getQuantity()
-                        )
-                );
+                                order.getSymbol(), position.quantity(), order.getQuantity()));
             }
 
             log.debug("✓ Disponibilidad validada: posee {} de {}",
@@ -360,9 +356,7 @@ public class OrdersService {
             log.error("Error validando disponibilidad de acciones: {}", e.getMessage(), e);
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error al validar disponibilidad de acciones"
-            );
+                    "Error al validar disponibilidad de acciones");
         }
     }
 }
-
