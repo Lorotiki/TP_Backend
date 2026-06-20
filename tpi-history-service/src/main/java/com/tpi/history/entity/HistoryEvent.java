@@ -39,15 +39,31 @@ public class HistoryEvent {
     @Column(name = "causation_id")
     private UUID causationId;
 
+<<<<<<< HEAD:tpi-history-service/src/main/java/com/tpi/history/entity/HistoryEvent.java
     // to-do cambiar mapeo de Entidad a Bda relacion 
+=======
+/*
+@JdbcTypeCode(SqlTypes.JSON), le estás diciendo a Hibernate:
+"Che, cuando guardes este Map, convertilo automáticamente a una cadena de texto JSON (un String formateado) y metelo en la columna payload_json de la base de datos.
+Y cuando lo leas, volvé a transformarlo en un objeto Map".
+ */
+
+>>>>>>> 69e6349665b8c1546cf65a494a4021b69039f32f:tpi-history-service/src/main/java/com/tpi/history/HistoryEvent.java
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "payload_json", nullable = false)
     private Map<String, Object> payloadJson;
 
     @Column(name = "occurred_at", nullable = false)
     private LocalDateTime occurredAt;
+<<<<<<< HEAD:tpi-history-service/src/main/java/com/tpi/history/entity/HistoryEvent.java
 
     // TO-DO BUSCAR ALTERNATIVA CON LOMBOK
+=======
+/*
+Sirve para marcar un método que se tiene que ejecutar automáticamente justo antes de que el objeto se inserte por primera vez en la base de datos
+(cuando se hace un save o persist).
+ */
+>>>>>>> 69e6349665b8c1546cf65a494a4021b69039f32f:tpi-history-service/src/main/java/com/tpi/history/HistoryEvent.java
     @PrePersist
     void onCreate() {
         if (eventId == null) {
