@@ -2,15 +2,14 @@ spring:
   application:
     name: tpi-portfolio-service
   datasource:
-    url: ${PORTFOLIO_DB_URL:jdbc:postgresql://localhost:5433/portfolio_db}
-    username: ${PORTFOLIO_DB_USER:postgres}
-    password: ${PORTFOLIO_DB_PASSWORD:postgres}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/stockmarket}
+    username: ${SPRING_DATASOURCE_USERNAME:admin}
+    password: ${SPRING_DATASOURCE_PASSWORD:admin}
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     properties:
       hibernate:
-        default_schema: portfolio
         jdbc:
           time_zone: UTC
     open-in-view: false

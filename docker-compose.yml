@@ -1,0 +1,151 @@
+version: '3.8'
+
+services:
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: stockmarket
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db-init/01_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    networks:
+      - tpi-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d stockmarket"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.0
+    container_name: keycloak
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/stockmarket
+      KC_DB_USERNAME: admin
+      KC_DB_PASSWORD: admin
+    ports:
+      - "8180:8080"
+    depends_on:
+      - postgres
+    networks:
+      - tpi-network
+
+  market-data-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE_NAME: tpi-market-data-service
+    container_name: market-data-service
+    ports:
+      - "8081:8081"
+    environment:
+      SERVER_PORT: 8081
+    networks:
+      - tpi-network
+    restart: on-failure
+
+  portfolio-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE_NAME: tpi-portfolio-service
+    container_name: portfolio-service
+    ports:
+      - "8082:8082"
+    environment:
+      SERVER_PORT: 8082
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/stockmarket
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      KEYCLOAK_URL: http://keycloak:8080
+    depends_on:
+      - postgres
+      - keycloak
+    networks:
+      - tpi-network
+    restart: on-failure
+
+  orders-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE_NAME: tpi-orders-service
+    container_name: orders-service
+    ports:
+      - "8083:8083"
+    environment:
+      SERVER_PORT: 8083
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/stockmarket
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      KEYCLOAK_URL: http://keycloak:8080
+    depends_on:
+      - postgres
+      - keycloak
+    networks:
+      - tpi-network
+    restart: on-failure
+
+  history-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE_NAME: tpi-history-service
+    container_name: history-service
+    ports:
+      - "8084:8084"
+    environment:
+      SERVER_PORT: 8084
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/stockmarket
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      KEYCLOAK_URL: http://keycloak:8080
+    depends_on:
+      - postgres
+      - keycloak
+    networks:
+      - tpi-network
+    restart: on-failure
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE_NAME: tpi-api-gateway
+    container_name: api-gateway
+    ports:
+      - "8085:8085"
+    environment:
+      SERVER_PORT: 8085
+      KEYCLOAK_URL: http://keycloak:8080
+    depends_on:
+      - keycloak
+      - market-data-service
+      - portfolio-service
+      - orders-service
+      - history-service
+    networks:
+      - tpi-network
+    restart: on-failure
+
+networks:
+  tpi-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

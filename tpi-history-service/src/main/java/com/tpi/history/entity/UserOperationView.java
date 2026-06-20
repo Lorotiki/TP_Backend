@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "user_operation_view", schema = "history")
+@Table(name = "user_operation_view")
 public class UserOperationView {
 
     @Id

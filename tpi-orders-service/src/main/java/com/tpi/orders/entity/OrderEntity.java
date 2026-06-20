@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "orders", schema = "orders")
+@Table(name = "orders")
 public class OrderEntity {
 
     @Id

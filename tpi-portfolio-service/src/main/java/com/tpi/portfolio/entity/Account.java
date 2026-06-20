@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "accounts", schema = "portfolio")
+@Table(name = "accounts")
 public class Account {
 
     @Id

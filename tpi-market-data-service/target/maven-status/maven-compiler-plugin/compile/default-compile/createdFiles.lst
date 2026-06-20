@@ -1,4 +1,7 @@
-com/tpi/marketdata/QuoteResponse.class
-com/tpi/marketdata/QuoteController.class
-com/tpi/marketdata/MarketDataApplication.class
-com/tpi/marketdata/MarketQuoteService.class
+com\tpi\marketdata\controller\QuoteController.class
+com\tpi\marketdata\exception\GlobalExceptionHandler.class
+com\tpi\marketdata\MarketDataApplication.class
+com\tpi\marketdata\config\RestTemplateConfig.class
+com\tpi\marketdata\dto\QuoteResponse.class
+com\tpi\marketdata\service\MarketQuoteService.class
+com\tpi\marketdata\exception\ErrorResponse.class

@@ -20,7 +20,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "history_events", schema = "history")
+@Table(name = "history_events")
 public class HistoryEvent {
 
     @Id

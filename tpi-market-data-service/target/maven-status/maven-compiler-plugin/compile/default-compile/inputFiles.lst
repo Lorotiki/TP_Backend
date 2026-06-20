@@ -1,4 +1,6 @@
-/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-market-data-service/src/main/java/com/tpi/marketdata/MarketDataApplication.java
-/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-market-data-service/src/main/java/com/tpi/marketdata/MarketQuoteService.java
-/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-market-data-service/src/main/java/com/tpi/marketdata/QuoteController.java
-/home/leandro/Documentos/UTN/Backend/tp_backned_2026/tpi-market-data-service/src/main/java/com/tpi/marketdata/QuoteResponse.java
+C:\Users\juanc\Desktop\TpBack\tpi-market-data-service\src\main\java\com\tpi\marketdata\config\RestTemplateConfig.java
+C:\Users\juanc\Desktop\TpBack\tpi-market-data-service\src\main\java\com\tpi\marketdata\controller\QuoteController.java
+C:\Users\juanc\Desktop\TpBack\tpi-market-data-service\src\main\java\com\tpi\marketdata\dto\QuoteResponse.java
+C:\Users\juanc\Desktop\TpBack\tpi-market-data-service\src\main\java\com\tpi\marketdata\exception\GlobalExceptionHandler.java
+C:\Users\juanc\Desktop\TpBack\tpi-market-data-service\src\main\java\com\tpi\marketdata\MarketDataApplication.java
+C:\Users\juanc\Desktop\TpBack\tpi-market-data-service\src\main\java\com\tpi\marketdata\service\MarketQuoteService.java
