@@ -1,8 +1,17 @@
 FROM maven:3.9.9 AS build
 ARG MODULE_NAME
 WORKDIR /workspace
+
+# Copiar solo archivos pom.xml para aprovechar caché de dependencias
+COPY pom.xml /workspace/
+COPY ${MODULE_NAME}/pom.xml /workspace/${MODULE_NAME}/
+RUN mvn -pl ${MODULE_NAME} -am dependency:resolve -q 2>/dev/null || true
+
+# Copiar código fuente
 COPY . /workspace
-RUN mvn -pl ${MODULE_NAME} -am clean package -DskipTests
+
+# Compilar
+RUN mvn -pl ${MODULE_NAME} -am clean package -DskipTests -q
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app

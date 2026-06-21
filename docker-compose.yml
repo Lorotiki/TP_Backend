@@ -13,7 +13,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db-init/01_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./db-init/01-db-keycloak.sql:/docker-entrypoint-initdb.d/01-db-keycloak.sql:ro
+      - ./db-init/init.sql:/docker-entrypoint-initdb.d/02-stockmarket.sql:ro
     networks:
       - tpi-network
     healthcheck:
@@ -30,15 +31,29 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/stockmarket
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
       KC_DB_USERNAME: admin
       KC_DB_PASSWORD: admin
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KEYCLOAK_IMPORT: /opt/keycloak/data/import/tpi-realm-base.json
+      KEYCLOAK_LOGLEVEL: INFO
     ports:
       - "8180:8080"
+    volumes:
+      - ./tpi-keycloak-config/realm/tpi-realm-base.json:/opt/keycloak/data/import/tpi-realm-base.json:ro
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - tpi-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: on-failure
 
   market-data-service:
     build:
