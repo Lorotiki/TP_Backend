@@ -202,11 +202,11 @@ public OrderResponse buy(OrderRequest request) {
         log.debug("✓ Balance validado: requiredBalance={} ARS", 
                  order.getQuantity().multiply(order.getLimitPrice()));
         
-        orderRepository.save(order);
+        ordenRepository.save(order);
         log.debug("✓ Orden persistida en BD");
 
         // Matching
-        var availableSellers = orderRepository.findMatchingSellers(order.getSymbol(), "SELL");
+        var availableSellers = ordenRepository.findMatchingSellers(order.getSymbol(), "SELL");
         log.debug("✓ Encontradas {} órdenes de venta disponibles", availableSellers.size());
         
         var matchedQuantity = BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP);
@@ -254,7 +254,7 @@ public OrderResponse buy(OrderRequest request) {
             matchedQuantity = matchedQuantity.add(fillQty);
         }
 
-        orderRepository.saveAll(List.of(order));
+        ordenRepository.saveAll(List.of(order));
         recordHistory("BUY_ORDER_EXECUTED", order, matchedQuantity, order.getRemainingQuantity(), 
                      order.getLimitPrice(), "Orden de compra ejecutada");
         
@@ -281,7 +281,7 @@ public OrderResponse sell(OrderRequest request) {
         var order = createOrder(request, "SELL");
         validateSellAvailability(order);
         order.setStatus("PENDING");
-        orderRepository.save(order);
+        ordenRepository.save(order);
         
         log.info("✅ Orden de venta registrada: orderId={}, status={}", 
                 order.getId(), order.getStatus());
@@ -455,7 +455,7 @@ private void validateSellAvailability(OrderEntity order) {
 ```java
 package com.tpi.marketdata.service;
 
-import com.tpi.marketdata.dto.QuoteResponse;
+import com.tpi.marketdata.dto.CotizacionResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -556,7 +556,7 @@ public class MarketQuoteService {
 ```java
 package com.tpi.marketdata.service;
 
-import com.tpi.marketdata.dto.QuoteResponse;
+import com.tpi.marketdata.dto.CotizacionResponse;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;

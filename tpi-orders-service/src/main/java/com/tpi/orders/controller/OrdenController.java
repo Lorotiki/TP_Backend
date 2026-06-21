@@ -1,0 +1,41 @@
+package com.tpi.orders.controller;
+
+import com.tpi.orders.dto.OrdenRequest;
+import com.tpi.orders.dto.OrdenResponse;
+import com.tpi.orders.service.OrdenService;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping
+public class OrdenController {
+
+    private final OrdenService ordenService;
+
+    public OrdenController(OrdenService ordenService) {
+        this.ordenService = ordenService;
+    }
+
+    @PostMapping("/ordenes/comprar")
+    public OrdenResponse comprar(@Valid @RequestBody OrdenRequest request) {
+        return ordenService.comprar(request);
+    }
+
+    @PostMapping("/ordenes/vender")
+    public OrdenResponse vender(@Valid @RequestBody OrdenRequest request) {
+        return ordenService.vender(request);
+    }
+
+    @GetMapping("/users/{userId}/ordenes")
+    public List<OrdenResponse> getOrdenes(@PathVariable String userId) {
+        return ordenService.getOrdenesByUsuario(userId);
+    }
+}
+

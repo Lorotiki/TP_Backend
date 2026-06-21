@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-portfolio-service\src\main\java\com\tpi\portfolio\controller\PortfolioController.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-portfolio-service\src\main\java\com\tpi\portfolio\dto\DepositRequest.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-portfolio-service\src\main\java\com\tpi\portfolio\dto\DepositResponse.java
@@ -13,3 +14,20 @@ C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-portfolio-service\src\main\java\com\tpi\portfolio\repository\CashMovementRepository.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-portfolio-service\src\main\java\com\tpi\portfolio\repository\PositionRepository.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-portfolio-service\src\main\java\com\tpi\portfolio\service\PortfolioService.java
+=======
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-portfolio-service/src/main/java/com/tpi/portfolio/PortfolioApplication.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-portfolio-service/src/main/java/com/tpi/portfolio/controller/PortfolioController.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-portfolio-service/src/main/java/com/tpi/portfolio/dto/DepositRequest.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-portfolio-service/src/main/java/com/tpi/portfolio/dto/DepositResponse.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-portfolio-service/src/main/java/com/tpi/portfolio/dto/PortfolioResponse.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-portfolio-service/src/main/java/com/tpi/portfolio/dto/PositionResponse.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-portfolio-service/src/main/java/com/tpi/portfolio/dto/TradeAdjustmentRequest.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-portfolio-service/src/main/java/com/tpi/portfolio/entity/Account.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-portfolio-service/src/main/java/com/tpi/portfolio/entity/CashMovement.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-portfolio-service/src/main/java/com/tpi/portfolio/entity/Position.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-portfolio-service/src/main/java/com/tpi/portfolio/exception/GlobalExceptionHandler.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-portfolio-service/src/main/java/com/tpi/portfolio/repository/AccountRepository.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-portfolio-service/src/main/java/com/tpi/portfolio/repository/CashMovementRepository.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-portfolio-service/src/main/java/com/tpi/portfolio/repository/PositionRepository.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-portfolio-service/src/main/java/com/tpi/portfolio/service/PortfolioService.java
+>>>>>>> 5fbdd4e1531f55028bf5333ba750e8db441ab992

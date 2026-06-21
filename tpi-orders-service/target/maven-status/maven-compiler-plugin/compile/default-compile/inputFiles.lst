@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-orders-service\src\main\java\com\tpi\orders\config\RestClientsConfig.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-orders-service\src\main\java\com\tpi\orders\controller\OrdersController.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-orders-service\src\main\java\com\tpi\orders\dto\HistoryEventClientRequest.java
@@ -14,3 +15,21 @@ C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-orders-service\src\main\java\com\tpi\orders\repository\OrderFillRepository.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-orders-service\src\main\java\com\tpi\orders\repository\OrderRepository.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-orders-service\src\main\java\com\tpi\orders\service\OrdersService.java
+=======
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-orders-service/src/main/java/com/tpi/orders/OrdersApplication.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-orders-service/src/main/java/com/tpi/orders/config/RestClientsConfig.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-orders-service/src/main/java/com/tpi/orders/controller/OrdersController.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-orders-service/src/main/java/com/tpi/orders/dto/HistoryEventClientRequest.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-orders-service/src/main/java/com/tpi/orders/dto/OrderRequest.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-orders-service/src/main/java/com/tpi/orders/dto/OrderResponse.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-orders-service/src/main/java/com/tpi/orders/dto/PortfolioClientPositionResponse.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-orders-service/src/main/java/com/tpi/orders/dto/PortfolioClientResponse.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-orders-service/src/main/java/com/tpi/orders/dto/PortfolioTradeClientRequest.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-orders-service/src/main/java/com/tpi/orders/dto/QuoteClientResponse.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-orders-service/src/main/java/com/tpi/orders/entity/OrderEntity.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-orders-service/src/main/java/com/tpi/orders/entity/OrderFill.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-orders-service/src/main/java/com/tpi/orders/exception/GlobalExceptionHandler.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-orders-service/src/main/java/com/tpi/orders/repository/OrderFillRepository.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-orders-service/src/main/java/com/tpi/orders/repository/OrderRepository.java
+/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-orders-service/src/main/java/com/tpi/orders/service/OrdersService.java
+>>>>>>> 5fbdd4e1531f55028bf5333ba750e8db441ab992

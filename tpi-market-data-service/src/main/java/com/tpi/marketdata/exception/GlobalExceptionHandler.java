@@ -39,9 +39,8 @@ public class GlobalExceptionHandler {
                 ));
     }
 }
-
 record ErrorResponse(
-        int code,
-        String message,
-        OffsetDateTime timestamp
+        int codigo,
+        String mensaje,
+        OffsetDateTime marcaTiempo
 ) {}

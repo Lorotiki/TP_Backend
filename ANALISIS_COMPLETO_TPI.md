@@ -382,7 +382,7 @@ public class OrdersController {
     @ApiResponse(responseCode = "400", description = "Datos inválidos")
     @ApiResponse(responseCode = "401", description = "No autenticado")
     public OrderResponse buy(@Valid @RequestBody OrderRequest request) {
-        return ordersService.buy(request);
+        return ordenService.buy(request);
     }
 }
 

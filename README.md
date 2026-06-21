@@ -42,7 +42,7 @@ tp_backned_2026/
 - `tpi-orders-service`: `8083`
 - `tpi-history-service`: `8084`
 - `tpi-api-gateway`: `8085`
-- `keycloak`: `8080`
+- `keycloak`: `8180` (en el `docker-compose.yml` raíz)
 
 ## Arranque rápido de la infraestructura
 Requisitos:
@@ -96,7 +96,7 @@ mvn -pl tpi-api-gateway spring-boot:run
 ```
 
 ## Acceso a Keycloak
-- URL: `http://localhost:8080`
+- URL: `http://localhost:8180`
 - Admin: `admin`
 - Password: `admin`
 - Realm: `tpi`
