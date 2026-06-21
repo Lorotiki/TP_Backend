@@ -382,12 +382,12 @@ private void validateSellAvailability(OrderEntity order) {
         }
         
         // Buscar la posición del símbolo
-        var position = portfolio.positions().stream()
+        var posicion = portfolio.positions().stream()
             .filter(p -> p.symbol().equalsIgnoreCase(order.getSymbol()))
             .findFirst()
             .orElse(null);
         
-        if (position == null || position.quantity().compareTo(BigDecimal.ZERO) == 0) {
+        if (posicion == null || posicion.quantity().compareTo(BigDecimal.ZERO) == 0) {
             log.warn("❌ Posición no disponible para venta: usuario={}, symbol={}", 
                     order.getUserId(), order.getSymbol());
             throw new ResponseStatusException(
@@ -396,22 +396,22 @@ private void validateSellAvailability(OrderEntity order) {
             );
         }
         
-        if (position.quantity().compareTo(order.getQuantity()) < 0) {
+        if (posicion.quantity().compareTo(order.getQuantity()) < 0) {
             log.warn("❌ Cantidad insuficiente de acciones: usuario={}, symbol={}, " +
                     "requerida={}, disponible={}", 
                     order.getUserId(), order.getSymbol(), 
-                    order.getQuantity(), position.quantity());
+                    order.getQuantity(), posicion.quantity());
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 String.format(
                     "Cantidad insuficiente de %s. Tiene: %s, quiere vender: %s",
-                    order.getSymbol(), position.quantity(), order.getQuantity()
+                    order.getSymbol(), posicion.quantity(), order.getQuantity()
                 )
             );
         }
         
         log.debug("✓ Disponibilidad validada: posee {} de {}", 
-                 position.quantity(), order.getSymbol());
+                 posicion.quantity(), order.getSymbol());
         
     } catch (ResponseStatusException e) {
         throw e;
