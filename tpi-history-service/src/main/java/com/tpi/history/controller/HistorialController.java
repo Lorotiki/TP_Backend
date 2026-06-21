@@ -1,8 +1,8 @@
 package com.tpi.history.controller;
 
-import com.tpi.history.dto.HistoryEventRequest;
-import com.tpi.history.dto.HistoryEventResponse;
-import com.tpi.history.service.HistoryService;
+import com.tpi.history.dto.HistorialEventoRequest;
+import com.tpi.history.dto.HistorialEventoResponse;
+import com.tpi.history.service.HistorialService;
 
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,12 +16,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping
-public class HistoryController {
+public class HistorialController {
 
-    private final HistoryService historyService;
+    private final HistorialService historialService;
 
-    public HistoryController(HistoryService historyService) {
-        this.historyService = historyService;
+    public HistorialController(HistorialService historialService) {
+        this.historialService = historialService;
     }
 /*
 @RequestBody: Le dice a Spring que tome el cuerpo del JSON que envía el cliente y lo transforme automáticamente en el objeto HistoryEventRequest.
@@ -30,21 +30,21 @@ public class HistoryController {
 Spring frena el proceso acá y devuelve un error antes de tocar la base de datos.
  */
     @PostMapping("/events")
-    public HistoryEventResponse registerEvent(@Valid @RequestBody HistoryEventRequest request) {
-        return historyService.registerEvent(request);
+    public HistorialEventoResponse registraEvento(@Valid @RequestBody HistorialEventoRequest request) {
+        return historialService.registraEvento(request);
     }
 /*
 @PathVariable String userId: Le indica a Spring que la variable {userId} que viaja incrustada directamente en la URL dinámica
 se debe extraer y asignar al parámetro userId del método.
  */
     @GetMapping("/users/{userId}/history")
-    public List<HistoryEventResponse> getUserHistory(@PathVariable String userId) {
-        return historyService.getUserHistory(userId);
+    public List<HistorialEventoResponse> getHistorialUsuario(@PathVariable String userId) {
+        return historialService.getHistorialUsuario(userId);
     }
 
     @GetMapping("/admin/history")
-    public List<HistoryEventResponse> getAllHistory() {
-        return historyService.getAllHistory();
+    public List<HistorialEventoResponse> getHistorialCompleto() {
+        return historialService.getHistorialCompleto();
     }
 }
 

@@ -21,7 +21,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "history_events")
-public class HistoryEvent {
+public class HistorialEvento {
 
     @Id
     @Column(name = "event_id")

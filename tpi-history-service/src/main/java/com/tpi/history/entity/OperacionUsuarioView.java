@@ -14,7 +14,7 @@ import java.util.UUID;
 @Data
 @Entity
 @Table(name = "user_operation_view")
-public class UserOperationView {
+public class OperacionUsuarioView {
 
     @Id
     private UUID id;

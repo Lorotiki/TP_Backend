@@ -12,7 +12,7 @@ UUID Universall Unique Identifier
 @NotNull Validacion de Bean Validation para controlar que el valor no sea nulo
  */
 
-public record HistoryEventRequest(
+public record HistorialEventoRequest(
         UUID eventId,
         @NotBlank String eventType,
         String userId,

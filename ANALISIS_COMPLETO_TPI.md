@@ -211,7 +211,7 @@ public OrderResponse buy(OrderRequest request) {
 @PostMapping("/events")
 public HistoryEventResponse registerEvent(@Valid @RequestBody HistoryEventRequest request) {
     // Sin try-catch, sin validación de negocio
-    return historyService.registerEvent(request);
+    return historialService.registerEvent(request);
 }
 ```
 

@@ -1,11 +1,11 @@
 package com.tpi.history.service;
 
-import com.tpi.history.dto.HistoryEventRequest;
-import com.tpi.history.dto.HistoryEventResponse;
-import com.tpi.history.entity.HistoryEvent;
-import com.tpi.history.entity.UserOperationView;
-import com.tpi.history.repository.HistoryEventRepository;
-import com.tpi.history.repository.UserOperationViewRepository;
+import com.tpi.history.dto.HistorialEventoRequest;
+import com.tpi.history.dto.HistorialEventoResponse;
+import com.tpi.history.entity.HistorialEvento;
+import com.tpi.history.entity.OperacionUsuarioView;
+import com.tpi.history.repository.HistorialEventoRepository;
+import com.tpi.history.repository.OperacionUsuarioViewRepository;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -18,20 +18,20 @@ import java.util.UUID;
  * Conecta los controladores con el acceso a datos.
  */
 @Service // Indica a Spring que esta clase es un componente de servicio (Bean) para inyección de dependencias.
-public class HistoryService {
+public class HistorialService {
 
     // Dependencias finales (inmutables) para interactuar con la base de datos
-    private final HistoryEventRepository historyEventRepository;
-    private final UserOperationViewRepository userOperationViewRepository;
+    private final HistorialEventoRepository historialEventoRepository;
+    private final OperacionUsuarioViewRepository operacionUsuarioViewRepository;
 
     /**
      * Constructor para la inyección de dependencias.
      * Al ser un único constructor, Spring inyecta automáticamente los repositorios.
      */
-    public HistoryService(HistoryEventRepository historyEventRepository,
-                          UserOperationViewRepository userOperationViewRepository) {
-        this.historyEventRepository = historyEventRepository;
-        this.userOperationViewRepository = userOperationViewRepository;
+    public HistorialService(HistorialEventoRepository historialEventoRepository,
+                            OperacionUsuarioViewRepository operacionUsuarioViewRepository) {
+        this.historialEventoRepository = historialEventoRepository;
+        this.operacionUsuarioViewRepository = operacionUsuarioViewRepository;
     }
 
     /**
@@ -40,42 +40,42 @@ public class HistoryService {
      * evento o del Read Model, se hace un rollback completo para no dejar datos corruptos.
      */
     @Transactional
-    public HistoryEventResponse registerEvent(HistoryEventRequest request) {
+    public HistorialEventoResponse registraEvento(HistorialEventoRequest request) {
         // Se crea la entidad JPA que mapeará a la tabla de la base de datos
-        var event = new HistoryEvent();
+        var evento = new HistorialEvento();
 
         // Asignación de ID: Si la petición no trae un UUID, se genera uno aleatorio en el momento
         // Nota: Esto complementa tu lógica de seguridad @PrePersist que vimos antes
-        event.setEventId(request.eventId() != null ? request.eventId() : UUID.randomUUID());
+        evento.setEventId(request.eventId() != null ? request.eventId() : UUID.randomUUID());
 
         // Mapeo directo de los campos desde el Record (DTO) hacia la Entidad
-        event.setEventType(request.eventType());
-        event.setUserId(request.userId());
-        event.setOrderId(request.orderId());
+        evento.setEventType(request.eventType());
+        evento.setUserId(request.userId());
+        evento.setOrderId(request.orderId());
 
         // Datos cruciales para la trazabilidad y auditoría del microservicio
-        event.setCorrelationId(request.correlationId()); // Une todo el flujo punta a punta
-        event.setCausationId(request.causationId());     // Identifica qué disparó este evento
+        evento.setCorrelationId(request.correlationId()); // Une todo el flujo punta a punta
+        evento.setCausationId(request.causationId());     // Identifica qué disparó este evento
 
         // Asigna el mapa dinámico que Hibernate guardará como formato JSON en la BD
-        event.setPayloadJson(request.payloadJson());
+        evento.setPayloadJson(request.payloadJson());
 
         // Persistencia: Guarda el evento en la tabla principal de eventos
-        var saved = historyEventRepository.save(event);
+        var historialEventoGrabado = historialEventoRepository.save(evento);
 
         // CQRS Pattern / Read Model: Actualiza de forma asincrónica o paralela una vista optimizada de lectura
-        persistReadModel(saved);
+        persistModeloLectura(historialEventoGrabado);
 
         // Retorna el DTO de respuesta transformado para el cliente/frontend
-        return toResponse(saved);
+        return toResponse(historialEventoGrabado);
     }
 
     /**
      * Recupera el historial específico de un usuario, ordenado cronológicamente desde el más reciente.
      */
-    public List<HistoryEventResponse> getUserHistory(String userId) {
+    public List<HistorialEventoResponse> getHistorialUsuario(String userId) {
         // Uso de Streams de Java para transformar cada entidad de la lista en un DTO de respuesta
-        return historyEventRepository.findByUserIdOrderByOccurredAtDesc(userId).stream()
+        return historialEventoRepository.findByUserIdOrderByOccurredAtDesc(userId).stream()
                 .map(this::toResponse) // Equivalente a: event -> toResponse(event)
                 .toList();
     }
@@ -83,8 +83,8 @@ public class HistoryService {
     /**
      * Recupera todo el historial global del sistema ordenado por fecha de creación descendente.
      */
-    public List<HistoryEventResponse> getAllHistory() {
-        return historyEventRepository.findAllByOrderByOccurredAtDesc().stream()
+    public List<HistorialEventoResponse> getHistorialCompleto() {
+        return historialEventoRepository.findAllByOrderByOccurredAtDesc().stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -93,44 +93,44 @@ public class HistoryService {
      * Método auxiliar privado para persistir el "Read Model" (Modelo de Lectura).
      * Extrae información estructurada a partir del JSON dinámico guardado en el evento.
      */
-    private void persistReadModel(HistoryEvent saved) {
+    private void persistModeloLectura(HistorialEvento historialEventoGuardado) {
         // Validación defensiva: Si no hay un usuario válido asociado, no se registra la vista operativa
-        if (saved.getUserId() == null || saved.getUserId().isBlank()) {
+        if (historialEventoGuardado.getUserId() == null || historialEventoGuardado.getUserId().isBlank()) {
             return;
         }
 
         // Instancia la entidad de la vista de operaciones del usuario
-        var item = new UserOperationView();
-        item.setUserId(saved.getUserId());
-        item.setOperationType(saved.getEventType());
+        var item = new OperacionUsuarioView();
+        item.setUserId(historialEventoGuardado.getUserId());
+        item.setOperationType(historialEventoGuardado.getEventType());
 
         // Extracción dinámica: Al ser payloadJson un Map<String, Object>, se castea el valor a String
-        item.setSymbol((String) saved.getPayloadJson().get("symbol"));
+        item.setSymbol((String) historialEventoGuardado.getPayloadJson().get("symbol"));
 
         // Extracción segura del monto: Convierte el Object dynamic a un formato monetario estricto (BigDecimal)
-        item.setAmountArs(extractAmount(saved.getPayloadJson().get("amountArs")));
+        item.setAmountArs(extraerMonto(historialEventoGuardado.getPayloadJson().get("amountArs")));
 
         // Guarda en la tabla optimizada para consultas de operaciones
-        userOperationViewRepository.save(item);
+        operacionUsuarioViewRepository.save(item);
     }
 
     /**
      * Convierte de manera segura cualquier representación numérica dinámica (como la que viene
      * deserializada de un JSON de Jackson) a un tipo adecuado para finanzas (BigDecimal con 2 decimales).
      */
-    private BigDecimal extractAmount(Object value) {
-        if (value == null) {
+    private BigDecimal extraerMonto(Object valor) {
+        if (valor == null) {
             return null;
         }
 
         // Si Jackson lo deserializó como una subclase de Number (Integer, Double, Long, etc.)
-        if (value instanceof Number number) {
+        if (valor instanceof Number number) {
             return BigDecimal.valueOf(number.doubleValue())
                     .setScale(2, java.math.RoundingMode.HALF_UP); // Redondeo escolar/financiero estándar
         }
 
         // Si viene como String u otra representación, intenta parsearlo directamente de su texto
-        return new BigDecimal(value.toString())
+        return new BigDecimal(valor.toString())
                 .setScale(2, java.math.RoundingMode.HALF_UP);
     }
 
@@ -138,8 +138,8 @@ public class HistoryService {
      * Mapper manual: Transforma la entidad JPA 'HistoryEvent' al Record de salida 'HistoryEventResponse'.
      * Mantiene las capas de la arquitectura desacopladas (el exterior nunca ve la entidad de base de datos cruda).
      */
-    private HistoryEventResponse toResponse(HistoryEvent event) {
-        return new HistoryEventResponse(
+    private HistorialEventoResponse toResponse(HistorialEvento event) {
+        return new HistorialEventoResponse(
                 event.getEventId(),
                 event.getEventType(),
                 event.getUserId(),
