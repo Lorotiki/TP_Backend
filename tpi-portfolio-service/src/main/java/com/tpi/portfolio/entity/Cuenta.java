@@ -14,13 +14,8 @@ import java.util.UUID;
 
 @Data
 @Entity
-<<<<<<< HEAD:tpi-portfolio-service/src/main/java/com/tpi/portfolio/entity/Account.java
 @Table(name = "accounts", schema = "portfolio")
-public class Account {
-=======
-@Table(name = "accounts")
 public class Cuenta {
->>>>>>> 623bf920568eef09b3d42b31fbb9f834d5ce4358:tpi-portfolio-service/src/main/java/com/tpi/portfolio/entity/Cuenta.java
 
     @Id
     private UUID id;
