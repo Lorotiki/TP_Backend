@@ -3,7 +3,7 @@ package com.tpi.orders.dto;
 import java.util.Map;
 import java.util.UUID;
 
-public record HistoryEventClientRequest(
+public record HistorialEventosClienteRequest(
         UUID eventId,
         String eventType,
         String userId,

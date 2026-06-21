@@ -1,13 +1,13 @@
 package com.tpi.orders.repository;
 
-import com.tpi.orders.entity.OrderEntity;
+import com.tpi.orders.entity.OrdenEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.UUID;
 
-public interface OrderRepository extends JpaRepository<OrderEntity, UUID> {
+public interface OrdenRepository extends JpaRepository<OrdenEntity, UUID> {
 
     @Query("""
             select o from OrderEntity o
@@ -16,14 +16,14 @@ public interface OrderRepository extends JpaRepository<OrderEntity, UUID> {
               and o.status in ('PENDING', 'PARTIALLY_FILLED')
             order by o.limitPrice asc, o.createdAt asc
             """)
-    List<OrderEntity> findMatchingSellers(String symbol, String side);
+    List<OrdenEntity> findCoincidenciasVentas(String symbol, String side);
 
     @Query("""
             select o from OrderEntity o
             where o.userId = :userId
             order by o.createdAt desc
             """)
-    List<OrderEntity> findByUserIdOrderByCreatedAtDesc(String userId);
+    List<OrdenEntity> findByUsuarioIdOrdenByCreatedAtDesc(String usuarioId);
 
     @Query("""
             select o from OrderEntity o
@@ -32,6 +32,6 @@ public interface OrderRepository extends JpaRepository<OrderEntity, UUID> {
               and o.side = 'SELL'
               and o.status in ('PENDING', 'PARTIALLY_FILLED')
             """)
-    List<OrderEntity> findOpenSellOrders(String userId, String symbol);
+    List<OrdenEntity> findOrdenesVentaAbiertas(String usuarioId, String simbolo);
 }
 

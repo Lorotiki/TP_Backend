@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
-public record OrderRequest(
+public record OrdenRequest(
         @NotBlank String userId,
         @NotBlank String symbol,
         @NotNull @DecimalMin(value = "0.0001") BigDecimal quantity,

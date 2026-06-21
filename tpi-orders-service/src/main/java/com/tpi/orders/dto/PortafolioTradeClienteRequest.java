@@ -2,7 +2,7 @@ package com.tpi.orders.dto;
 
 import java.math.BigDecimal;
 
-public record PortfolioTradeClientRequest(
+public record PortafolioTradeClienteRequest(
         String side,
         String symbol,
         BigDecimal quantity,
