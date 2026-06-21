@@ -5,6 +5,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -12,6 +16,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "order_fills", schema = "orders")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class OrderFill {
 
     @Id
@@ -42,53 +50,6 @@ public class OrderFill {
         }
         executedAt = LocalDateTime.now();
     }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public UUID getBuyOrderId() {
-        return buyOrderId;
-    }
-
-    public void setBuyOrderId(UUID buyOrderId) {
-        this.buyOrderId = buyOrderId;
-    }
-
-    public UUID getSellOrderId() {
-        return sellOrderId;
-    }
-
-    public void setSellOrderId(UUID sellOrderId) {
-        this.sellOrderId = sellOrderId;
-    }
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public BigDecimal getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(BigDecimal quantity) {
-        this.quantity = quantity;
-    }
-
-    public BigDecimal getPriceArs() {
-        return priceArs;
-    }
-
-    public void setPriceArs(BigDecimal priceArs) {
-        this.priceArs = priceArs;
-    }
 }
+
 

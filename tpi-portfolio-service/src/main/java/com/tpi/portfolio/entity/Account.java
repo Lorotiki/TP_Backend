@@ -6,6 +6,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,6 +17,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "accounts", schema = "portfolio")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Account {
 
     @Id
@@ -47,37 +55,6 @@ public class Account {
     void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public BigDecimal getBalanceArs() {
-        return balanceArs;
-    }
-
-    public void setBalanceArs(BigDecimal balanceArs) {
-        this.balanceArs = balanceArs;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
 }
+
 
