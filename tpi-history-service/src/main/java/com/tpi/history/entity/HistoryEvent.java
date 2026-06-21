@@ -20,7 +20,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "history_events", schema = "history")
+@Table(name = "history_events")
 public class HistoryEvent {
 
     @Id
@@ -42,7 +42,12 @@ public class HistoryEvent {
     @Column(name = "causation_id")
     private UUID causationId;
 
-    // to-do cambiar mapeo de Entidad a Bda relacion 
+/*
+@JdbcTypeCode(SqlTypes.JSON), le estás diciendo a Hibernate:
+"Che, cuando guardes este Map, convertilo automáticamente a una cadena de texto JSON (un String formateado) y metelo en la columna payload_json de la base de datos.
+Y cuando lo leas, volvé a transformarlo en un objeto Map".
+ */
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "payload_json", nullable = false)
     private Map<String, Object> payloadJson;
@@ -50,7 +55,10 @@ public class HistoryEvent {
     @Column(name = "occurred_at", nullable = false)
     private LocalDateTime occurredAt;
 
-    // TO-DO BUSCAR ALTERNATIVA CON LOMBOK
+    /*
+    Sirve para marcar un método que se tiene que ejecutar automáticamente justo antes de que el objeto se inserte por primera vez en la base de datos
+    (cuando se hace un save o persist).
+     */
     @PrePersist
     void onCreate() {
         if (eventId == null) {
@@ -59,71 +67,6 @@ public class HistoryEvent {
         if (occurredAt == null) {
             occurredAt = LocalDateTime.now();
         }
-    }
-
-    // to-do ELIMINAR GETTERS Y SETTERS, USAR LOMBOK @DATA
-    public UUID getEventId() {
-        return eventId;
-    }
-
-    public void setEventId(UUID eventId) {
-        this.eventId = eventId;
-    }
-
-    public String getEventType() {
-        return eventType;
-    }
-
-    public void setEventType(String eventType) {
-        this.eventType = eventType;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public UUID getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(UUID orderId) {
-        this.orderId = orderId;
-    }
-
-    public UUID getCorrelationId() {
-        return correlationId;
-    }
-
-    public void setCorrelationId(UUID correlationId) {
-        this.correlationId = correlationId;
-    }
-
-    public UUID getCausationId() {
-        return causationId;
-    }
-
-    public void setCausationId(UUID causationId) {
-        this.causationId = causationId;
-    }
-
-    public Map<String, Object> getPayloadJson() {
-        return payloadJson;
-    }
-
-    public void setPayloadJson(Map<String, Object> payloadJson) {
-        this.payloadJson = payloadJson;
-    }
-
-    public LocalDateTime getOccurredAt() {
-        return occurredAt;
-    }
-
-    public void setOccurredAt(LocalDateTime occurredAt) {
-        this.occurredAt = occurredAt;
     }
 }
 

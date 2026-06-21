@@ -14,12 +14,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity
-@Table(name = "order_fills", schema = "orders")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Entity
+@Table(name = "order_fills")
 public class OrderFill {
 
     @Id

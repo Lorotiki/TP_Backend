@@ -1,0 +1,16 @@
+.git
+.gitignore
+.idea
+*.iml
+.vscode
+*.swp
+*.swo
+*~
+.DS_Store
+target/
+.github/
+.gitlab-ci.yml
+.travis.yml
+README.md
+DOCKER_SETUP.md
+docker-compose.yml

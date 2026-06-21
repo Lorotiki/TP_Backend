@@ -2,15 +2,14 @@ spring:
   application:
     name: tpi-orders-service
   datasource:
-    url: ${ORDERS_DB_URL:jdbc:postgresql://localhost:5434/orders_db}
-    username: ${ORDERS_DB_USER:postgres}
-    password: ${ORDERS_DB_PASSWORD:postgres}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/stockmarket}
+    username: ${SPRING_DATASOURCE_USERNAME:admin}
+    password: ${SPRING_DATASOURCE_PASSWORD:admin}
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     properties:
       hibernate:
-        default_schema: orders
         jdbc:
           time_zone: UTC
     open-in-view: false
@@ -20,9 +19,9 @@ server:
 
 clients:
   market-data:
-    base-url: ${MARKET_DATA_BASE_URL:http://localhost:8081}
+    base-url: ${MARKET_DATA_BASE_URL:http://market-data-service:8081}
   portfolio:
-    base-url: ${PORTFOLIO_BASE_URL:http://localhost:8082}
+    base-url: ${PORTFOLIO_BASE_URL:http://portfolio-service:8082}
   history:
-    base-url: ${HISTORY_BASE_URL:http://localhost:8084}
+    base-url: ${HISTORY_BASE_URL:http://history-service:8084}
 

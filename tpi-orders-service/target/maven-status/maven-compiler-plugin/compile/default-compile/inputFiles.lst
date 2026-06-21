@@ -9,6 +9,7 @@ C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-orders-service\src\main\java\com\tpi\orders\dto\QuoteClientResponse.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-orders-service\src\main\java\com\tpi\orders\entity\OrderEntity.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-orders-service\src\main\java\com\tpi\orders\entity\OrderFill.java
+C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-orders-service\src\main\java\com\tpi\orders\exception\GlobalExceptionHandler.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-orders-service\src\main\java\com\tpi\orders\OrdersApplication.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-orders-service\src\main\java\com\tpi\orders\repository\OrderFillRepository.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-orders-service\src\main\java\com\tpi\orders\repository\OrderRepository.java

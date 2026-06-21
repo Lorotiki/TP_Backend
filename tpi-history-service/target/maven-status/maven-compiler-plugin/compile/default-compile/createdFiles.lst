@@ -1,9 +1,11 @@
 com\tpi\history\entity\UserOperationView.class
+com\tpi\history\exception\GlobalExceptionHandler.class
 com\tpi\history\controller\HistoryController.class
 com\tpi\history\repository\HistoryEventRepository.class
 com\tpi\history\HistoryApplication.class
 com\tpi\history\service\HistoryService.class
 com\tpi\history\repository\UserOperationViewRepository.class
+com\tpi\history\exception\ErrorResponse.class
 com\tpi\history\dto\HistoryEventResponse.class
 com\tpi\history\dto\HistoryEventRequest.class
 com\tpi\history\entity\HistoryEvent.class

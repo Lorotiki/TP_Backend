@@ -2,15 +2,14 @@ spring:
   application:
     name: tpi-history-service
   datasource:
-    url: ${HISTORY_DB_URL:jdbc:postgresql://localhost:5435/history_db}
-    username: ${HISTORY_DB_USER:postgres}
-    password: ${HISTORY_DB_PASSWORD:postgres}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/stockmarket}
+    username: ${SPRING_DATASOURCE_USERNAME:admin}
+    password: ${SPRING_DATASOURCE_PASSWORD:admin}
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     properties:
       hibernate:
-        default_schema: history
         jdbc:
           time_zone: UTC
     open-in-view: false

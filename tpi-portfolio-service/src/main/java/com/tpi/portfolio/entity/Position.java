@@ -7,20 +7,14 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Data
 @Entity
 @Table(name = "positions", schema = "portfolio")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Position {
 
     @Id
@@ -53,6 +47,45 @@ public class Position {
     void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-}
 
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public UUID getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(UUID accountId) {
+        this.accountId = accountId;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public BigDecimal getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(BigDecimal quantity) {
+        this.quantity = quantity;
+    }
+
+    public BigDecimal getAvgPriceArs() {
+        return avgPriceArs;
+    }
+
+    public void setAvgPriceArs(BigDecimal avgPriceArs) {
+        this.avgPriceArs = avgPriceArs;
+    }
+}
 

@@ -3,6 +3,7 @@ C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\dto\HistoryEventResponse.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\entity\HistoryEvent.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\entity\UserOperationView.java
+C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\exception\GlobalExceptionHandler.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\HistoryApplication.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\repository\HistoryEventRepository.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\repository\UserOperationViewRepository.java

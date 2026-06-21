@@ -4,14 +4,13 @@ com\tpi\portfolio\dto\TradeAdjustmentRequest.class
 com\tpi\portfolio\controller\PortfolioController.class
 com\tpi\portfolio\entity\Account.class
 com\tpi\portfolio\entity\Position.class
+com\tpi\portfolio\exception\ErrorResponse.class
 com\tpi\portfolio\entity\CashMovement.class
 com\tpi\portfolio\repository\PositionRepository.class
 com\tpi\portfolio\repository\AccountRepository.class
-com\tpi\portfolio\entity\CashMovement$CashMovementBuilder.class
 com\tpi\portfolio\repository\CashMovementRepository.class
+com\tpi\portfolio\exception\GlobalExceptionHandler.class
 com\tpi\portfolio\PortfolioApplication.class
 com\tpi\portfolio\dto\PositionResponse.class
-com\tpi\portfolio\entity\Position$PositionBuilder.class
-com\tpi\portfolio\entity\Account$AccountBuilder.class
 com\tpi\portfolio\dto\PortfolioResponse.class
 com\tpi\portfolio\dto\DepositRequest.class
