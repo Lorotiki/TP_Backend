@@ -455,7 +455,7 @@ private void validateSellAvailability(OrderEntity order) {
 ```java
 package com.tpi.marketdata.service;
 
-import com.tpi.marketdata.dto.QuoteResponse;
+import com.tpi.marketdata.dto.CotizacionResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -556,7 +556,7 @@ public class MarketQuoteService {
 ```java
 package com.tpi.marketdata.service;
 
-import com.tpi.marketdata.dto.QuoteResponse;
+import com.tpi.marketdata.dto.CotizacionResponse;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;

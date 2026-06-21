@@ -1,16 +1,15 @@
-version: '3.8'
-
 services:
 
   postgres:
     image: postgres:15
-    container_name: postgres
+    init: true
+    stop_grace_period: 30s
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: stockmarket
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db-init/01-db-keycloak.sql:/docker-entrypoint-initdb.d/01-db-keycloak.sql:ro
@@ -25,7 +24,8 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.0
-    container_name: keycloak
+    init: true
+    stop_grace_period: 30s
     command: start-dev
     environment:
       KEYCLOAK_ADMIN: admin
@@ -61,7 +61,8 @@ services:
       dockerfile: Dockerfile
       args:
         MODULE_NAME: tpi-market-data-service
-    container_name: market-data-service
+    init: true
+    stop_grace_period: 30s
     ports:
       - "8081:8081"
     environment:
@@ -76,7 +77,8 @@ services:
       dockerfile: Dockerfile
       args:
         MODULE_NAME: tpi-portfolio-service
-    container_name: portfolio-service
+    init: true
+    stop_grace_period: 30s
     ports:
       - "8082:8082"
     environment:
@@ -98,7 +100,8 @@ services:
       dockerfile: Dockerfile
       args:
         MODULE_NAME: tpi-orders-service
-    container_name: orders-service
+    init: true
+    stop_grace_period: 30s
     ports:
       - "8083:8083"
     environment:
@@ -120,7 +123,8 @@ services:
       dockerfile: Dockerfile
       args:
         MODULE_NAME: tpi-history-service
-    container_name: history-service
+    init: true
+    stop_grace_period: 30s
     ports:
       - "8084:8084"
     environment:
@@ -142,7 +146,8 @@ services:
       dockerfile: Dockerfile
       args:
         MODULE_NAME: tpi-api-gateway
-    container_name: api-gateway
+    init: true
+    stop_grace_period: 30s
     ports:
       - "8085:8085"
     environment:

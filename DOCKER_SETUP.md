@@ -72,7 +72,13 @@ docker-compose down -v
 - **Orders**: http://localhost:8083
 - **History**: http://localhost:8084
 - **Keycloak Admin**: http://localhost:8180 (usuario: admin, contraseña: admin)
-- **PostgreSQL**: localhost:5432
+- **PostgreSQL**: localhost:5433
+
+> Si algún contenedor no levanta o no podés entrar desde `localhost`, revisá primero que no haya otro proceso usando `8081`, `8085` o `8180` en tu máquina.
+
+```bash
+ss -ltnp | grep -E ':8080|:8081|:8082|:8083|:8084|:8085|:8180' || true
+```
 
 ## Variables de Entorno
 
@@ -131,9 +137,25 @@ El docker-compose.yml pasa el argumento en la sección `build.args`.
 - Cambia los puertos en el `docker-compose.yml` en la sección `ports:`
 - O detén los contenedores previos: `docker-compose down`
 
+### Error al detener o recrear un contenedor
+Si aparece algo como:
+
+- `cannot stop container ... permission denied`
+- `container with given ID already exists`
+
+hacelo en este orden:
+
+```bash
+sudo systemctl restart snap.docker.dockerd
+docker compose down --remove-orphans || true
+docker compose up -d --build
+```
+
+Si PostgreSQL ya estaba usando `5432` en tu máquina, este compose lo publica en `5433` para evitar ese choque.
+
 ### Base de datos no se inicializa
 - Verifica los logs: `docker-compose logs postgres`
-- Asegúrate de que PostgreSQL está corriendo antes que los servicios (order de `depends_on`)
+- Asegúrate de que PostgreSQL esté corriendo antes que los servicios (order de `depends_on`)
 
 ### Fallo en compilación Maven
 - Verifica que el código sea compilable: `mvn clean compile`
