@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
-public record DepositRequest(
+public record DepositoRequest(
         @NotNull @DecimalMin(value = "0.01") BigDecimal amountArs,
         @NotBlank String referenceId
 ) {

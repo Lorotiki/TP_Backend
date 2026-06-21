@@ -7,9 +7,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.tpi.portfolio.repository.AccountRepository;
-import com.tpi.portfolio.repository.CashMovementRepository;
-import com.tpi.portfolio.repository.PositionRepository;
+import com.tpi.portfolio.repository.CuentaRepository;
+import com.tpi.portfolio.repository.MovimientoDineroRepository;
+import com.tpi.portfolio.repository.PosicionRepository;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -18,30 +18,30 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class PortfolioServiceTest {
+class PortafolioServiceTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private CashMovementRepository cashMovementRepository;
+    private MovimientoDineroRepository movimientoDineroRepository;
 
     @Autowired
-    private PositionRepository positionRepository;
+    private PosicionRepository posicionRepository;
 
     @Autowired
-    private AccountRepository accountRepository;
+    private CuentaRepository cuentaRepository;
 
     @BeforeEach
     void cleanDatabase() {
-        cashMovementRepository.deleteAll();
-        positionRepository.deleteAll();
-        accountRepository.deleteAll();
+        movimientoDineroRepository.deleteAll();
+        posicionRepository.deleteAll();
+        cuentaRepository.deleteAll();
     }
 
 
     @Test
-    void shouldCreateAccountOnFirstPortfolioFetch() throws Exception {
+    void shouldCreateCuentaOnFirstPortfolioFetch() throws Exception {
         mockMvc.perform(get("/users/user-test/portfolio"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value("user-test"))
@@ -49,7 +49,7 @@ class PortfolioServiceTest {
     }
 
     @Test
-    void shouldDepositFunds() throws Exception {
+    void shouldDepositoFunds() throws Exception {
         mockMvc.perform(post("/users/user-test/deposits")
                         .contentType("application/json")
                         .content("""

@@ -3,10 +3,10 @@ package com.tpi.portfolio.dto;
 import java.math.BigDecimal;
 import java.util.List;
 
-public record PortfolioResponse(
+public record PortafolioResponse(
         String userId,
         BigDecimal balanceArs,
-        List<PositionResponse> positions
+        List<PosicionResponse> positions
 ) {
 }
 

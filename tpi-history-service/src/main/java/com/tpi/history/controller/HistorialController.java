@@ -2,8 +2,8 @@ package com.tpi.history.controller;
 
 import com.tpi.history.dto.HistorialEventoRequest;
 import com.tpi.history.dto.HistorialEventoResponse;
-import com.tpi.history.service.HistorialService;
 
+import com.tpi.history.service.HistorialService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

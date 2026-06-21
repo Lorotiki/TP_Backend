@@ -288,7 +288,7 @@ public OrderResponse buy(OrderRequest request) {
         .multiply(request.priceLimit())
         .setScale(2, RoundingMode.HALF_UP);
     
-    Portfolio portfolio = portfolioService.getPortfolio(request.userId());
+    Portfolio portfolio = portafolioService.getPortfolio(request.userId());
     if (portfolio.getBalanceArs().compareTo(requiredBalance) < 0) {
         throw new InsufficientBalanceException(
             "Balance insuficiente. Necesita: " + requiredBalance + " ARS"

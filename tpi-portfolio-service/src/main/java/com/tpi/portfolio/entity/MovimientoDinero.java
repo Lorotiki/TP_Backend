@@ -14,7 +14,7 @@ import java.util.UUID;
 @Data
 @Entity
 @Table(name = "cash_movements")
-public class CashMovement {
+public class MovimientoDinero {
 
     @Id
     private UUID id;
