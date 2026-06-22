@@ -1,23 +1,10 @@
-<<<<<<< HEAD
-C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\controller\HistoryController.java
-C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\dto\HistoryEventRequest.java
-C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\dto\HistoryEventResponse.java
-C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\entity\HistoryEvent.java
-C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\entity\UserOperationView.java
+C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\controller\HistorialController.java
+C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\dto\HistorialEventoRequest.java
+C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\dto\HistorialEventoResponse.java
+C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\entity\HistorialEvento.java
+C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\entity\OperacionUsuarioView.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\exception\GlobalExceptionHandler.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\HistoryApplication.java
-C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\repository\HistoryEventRepository.java
-C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\repository\UserOperationViewRepository.java
-C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\service\HistoryService.java
-=======
-/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-history-service/src/main/java/com/tpi/history/HistoryApplication.java
-/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-history-service/src/main/java/com/tpi/history/controller/HistoryController.java
-/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-history-service/src/main/java/com/tpi/history/dto/HistoryEventRequest.java
-/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-history-service/src/main/java/com/tpi/history/dto/HistoryEventResponse.java
-/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-history-service/src/main/java/com/tpi/history/entity/HistoryEvent.java
-/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-history-service/src/main/java/com/tpi/history/entity/UserOperationView.java
-/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-history-service/src/main/java/com/tpi/history/exception/GlobalExceptionHandler.java
-/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-history-service/src/main/java/com/tpi/history/repository/HistoryEventRepository.java
-/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-history-service/src/main/java/com/tpi/history/repository/UserOperationViewRepository.java
-/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-history-service/src/main/java/com/tpi/history/service/HistoryService.java
->>>>>>> 5fbdd4e1531f55028bf5333ba750e8db441ab992
+C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\repository\HistorialEventoRepository.java
+C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\repository\OperacionUsuarioViewRepository.java
+C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-history-service\src\main\java\com\tpi\history\service\HistorialService.java

@@ -35,3 +35,8 @@ management:
       exposure:
         include: health,info
 
+app:
+  keycloak:
+    client-id: ${KEYCLOAK_CLIENT_ID:tpi-backend-client}
+    redirect-uri: ${KEYCLOAK_REDIRECT_URI:http://localhost:8085/api/login/oauth2/code/keycloak}
+

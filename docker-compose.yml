@@ -26,7 +26,7 @@ services:
     image: quay.io/keycloak/keycloak:24.0.0
     init: true
     stop_grace_period: 30s
-    command: start-dev
+    command: start-dev --import-realm
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
@@ -36,7 +36,6 @@ services:
       KC_DB_PASSWORD: admin
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME_STRICT: "false"
-      KEYCLOAK_IMPORT: /opt/keycloak/data/import/tpi-realm-base.json
       KEYCLOAK_LOGLEVEL: INFO
     ports:
       - "8180:8080"
@@ -47,12 +46,6 @@ services:
         condition: service_healthy
     networks:
       - tpi-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
     restart: on-failure
 
   market-data-service:

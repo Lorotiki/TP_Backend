@@ -1,15 +1,6 @@
-<<<<<<< HEAD
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-market-data-service\src\main\java\com\tpi\marketdata\config\RestTemplateConfig.java
-C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-market-data-service\src\main\java\com\tpi\marketdata\controller\QuoteController.java
-C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-market-data-service\src\main\java\com\tpi\marketdata\dto\QuoteResponse.java
+C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-market-data-service\src\main\java\com\tpi\marketdata\controller\CotizacionController.java
+C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-market-data-service\src\main\java\com\tpi\marketdata\dto\CotizacionResponse.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-market-data-service\src\main\java\com\tpi\marketdata\exception\GlobalExceptionHandler.java
 C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-market-data-service\src\main\java\com\tpi\marketdata\MarketDataApplication.java
-C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-market-data-service\src\main\java\com\tpi\marketdata\service\MarketQuoteService.java
-=======
-/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-market-data-service/src/main/java/com/tpi/marketdata/MarketDataApplication.java
-/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-market-data-service/src/main/java/com/tpi/marketdata/config/RestTemplateConfig.java
-/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-market-data-service/src/main/java/com/tpi/marketdata/controller/CotizacionController.java
-/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-market-data-service/src/main/java/com/tpi/marketdata/dto/CotizacionResponse.java
-/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-market-data-service/src/main/java/com/tpi/marketdata/exception/GlobalExceptionHandler.java
-/home/leandro/Documentos/UTN/Backend/TP_Backend/tpi-market-data-service/src/main/java/com/tpi/marketdata/service/CotizacionMercadoService.java
->>>>>>> 5fbdd4e1531f55028bf5333ba750e8db441ab992
+C:\Users\juanc\OneDrive\Escritorio\Back\trabajoIntegrador\trabajoIntegrador\tpi-market-data-service\src\main\java\com\tpi\marketdata\service\CotizacionMercadoService.java

@@ -1,3 +1,168 @@
+
+
+
+
+
+
+
+API Gateway (Puerto 8085)
+
+# Health Check del Gateway
+curl http://localhost:8085/actuator/health
+
+# Obtener quote de una acción (Market Data)
+curl http://localhost:8085/quotes/AAPL
+curl http://localhost:8085/quotes/GOOGL
+curl http://localhost:8085/quotes/MSFT
+
+# Portfolio del usuario
+curl http://localhost:8085/users/user123/portfolio
+
+# Deposits en portfolio
+curl http://localhost:8085/users/user123/deposits
+
+# Trades del usuario
+curl http://localhost:8085/users/user123/portfolio/trades
+
+# Órdenes del usuario
+curl http://localhost:8085/users/user123/orders
+
+# Historial de eventos
+curl http://localhost:8085/users/user123/history
+curl http://localhost:8085/events
+
+Market Data Service (Puerto 8081 - Directo)
+
+# Health check
+curl http://localhost:8081/actuator/health
+
+# Obtener quote
+curl http://localhost:8081/quotes/AAPL
+curl http://localhost:8081/quotes/TSLA
+curl http://localhost:8081/quotes/AMAZON
+
+Portfolio Service (Puerto 8082 - Directo)
+
+# Health check
+curl http://localhost:8082/actuator/health
+
+# Get portfolio de un usuario
+curl http://localhost:8082/users/user123/portfolio
+
+# Depositar dinero (POST)
+curl -X POST http://localhost:8082/users/user123/deposits \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 1000, "currency": "USD"}'
+
+# Obtener trades
+curl http://localhost:8082/users/user123/portfolio/trades
+
+Orders Service (Puerto 8083 - Directo)
+
+# Health check
+curl http://localhost:8083/actuator/health
+
+# Obtener órdenes de un usuario
+curl http://localhost:8083/users/user123/orders
+
+# Crear una orden de compra (POST)
+curl -X POST http://localhost:8083/orders \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "user123",
+    "symbol": "AAPL",
+    "quantity": 10,
+    "limitPrice": 150.00,
+    "orderType": "BUY"
+  }'
+
+# Crear una orden de venta (POST)
+curl -X POST http://localhost:8083/orders \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "user123",
+    "symbol": "AAPL",
+    "quantity": 5,
+    "limitPrice": 160.00,
+    "orderType": "SELL"
+  }'
+
+History Service (Puerto 8084 - Directo)
+
+# Health check
+curl http://localhost:8084/actuator/health
+
+# Obtener historial de un usuario
+curl http://localhost:8084/users/user123/history
+
+# Obtener todos los eventos
+curl http://localhost:8084/events
+
+# Historial de admin
+curl http://localhost:8084/admin/history
+
+🔍 Ver Logs
+
+# Logs de API Gateway
+docker compose logs -f api-gateway
+
+# Logs de Orders Service
+docker compose logs -f orders-service
+
+# Logs de todas las aplicaciones
+docker compose logs -f
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 🔧 SOLUCIONES CONCRETAS - Código para Implementar
 
 ## 1. RESOLVER MERGE CONFLICT EN HistoryEvent.java

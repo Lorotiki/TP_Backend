@@ -23,6 +23,7 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers(HttpMethod.GET, "/quotes/**").permitAll()
+                    .pathMatchers(HttpMethod.GET, "/api/login/oauth2/code/keycloak").permitAll()
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/admin/**").hasRole("ADMIN")
                         .anyExchange().authenticated())

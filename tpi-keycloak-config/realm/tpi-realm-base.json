@@ -1,69 +1,226 @@
 {
-  "realm": "tpi",
-  "enabled": true,
-  "publicClient": false,
-  "clientAuthenticatorType": "client-secret",
-  "defaultRoles": ["offline_access", "user_default"],
-  "roles": {
-    "realm": [
-      {
-        "name": "USER",
-        "description": "Usuario regular del sistema",
-        "composite": false
-      },
-      {
-        "name": "ADMIN",
-        "description": "Administrador con visibilidad global",
-        "composite": false
-      }
-    ]
-  },
-  "clients": [
-    {
-      "clientId": "api-gateway",
-      "name": "API Gateway",
-      "description": "Cliente técnico para validar JWT",
-      "enabled": true,
-      "publicClient": false,
-      "clientAuthenticatorType": "client-secret",
-      "secret": "api-gateway-secret-change-me",
-      "redirectUris": [
-        "http://localhost:8080/callback",
-        "http://127.0.0.1:8080/callback"
-      ],
-      "webOrigins": [
-        "http://localhost:*",
-        "http://127.0.0.1:*"
-      ],
-      "protocolMappers": [
-        {
-          "protocolMapper": "oidc-usermodel-realm-role-mapper",
-          "protocol": "openid-connect",
-          "name": "realm roles",
-          "config": {
-            "usermodel.realmRoleAttributeName": "roles",
-            "access.token.claim": "true",
-            "id.token.claim": "true",
-            "claim.name": "roles",
-            "jsonType.label": "String"
-          }
-        },
-        {
-          "protocolMapper": "oidc-usermodel-basic-attributes",
-          "protocol": "openid-connect",
-          "name": "basic attributes",
-          "config": {
-            "access.token.claim": "true",
-            "id.token.claim": "true"
-          }
-        }
-      ]
-    }
-  ],
-  "import": [
-    "REALM",
-    "CLIENTS",
-    "ROLES"
-  ]
+	"id": "tpi",
+	"realm": "tpi",
+	"enabled": true,
+	"displayName": "TPI Mercado de Acciones",
+	"sslRequired": "external",
+	"registrationAllowed": false,
+	"rememberMe": true,
+	"loginWithEmailAllowed": true,
+	"duplicateEmailsAllowed": false,
+	"resetPasswordAllowed": true,
+	"defaultRoles": [
+		"offline_access",
+		"uma_authorization"
+	],
+	"roles": {
+		"realm": [
+			{
+				"name": "USER",
+				"description": "Usuario regular del sistema",
+				"composite": false,
+				"clientRole": false
+			},
+			{
+				"name": "ADMIN",
+				"description": "Administrador con visibilidad global",
+				"composite": false,
+				"clientRole": false
+			}
+		]
+	},
+	"clients": [
+		{
+			"clientId": "api-gateway",
+			"name": "API Gateway",
+			"description": "Cliente técnico para validar JWT y centralizar el acceso al backend",
+			"enabled": true,
+			"publicClient": false,
+			"protocol": "openid-connect",
+			"secret": "api-gateway-secret-change-me",
+			"standardFlowEnabled": false,
+			"implicitFlowEnabled": false,
+			"directAccessGrantsEnabled": false,
+			"serviceAccountsEnabled": true,
+			"frontchannelLogout": false,
+			"attributes": {
+				"saml.assertion.signature": "false",
+				"saml.force.post.binding": "false",
+				"saml.multivalued.roles": "false",
+				"saml.encrypt": "false",
+				"oauth2.device.authorization.grant.enabled": "false",
+				"client.secret.creation.time": "0"
+			},
+			"protocolMappers": [
+				{
+					"name": "realm roles",
+					"protocol": "openid-connect",
+					"protocolMapper": "oidc-usermodel-realm-role-mapper",
+					"consentRequired": false,
+					"config": {
+						"user.attribute": "",
+						"claim.name": "roles",
+						"jsonType.label": "String",
+						"multivalued": "true",
+						"id.token.claim": "true",
+						"access.token.claim": "true",
+						"userinfo.token.claim": "true",
+						"lightweight.claim": "false"
+					}
+				}
+			]
+		},
+		{
+			"clientId": "tpi-backend-client",
+			"name": "TPI Backend Client",
+			"description": "Cliente público para probar el flujo de autorización con redirección",
+			"enabled": true,
+			"publicClient": true,
+			"protocol": "openid-connect",
+			"standardFlowEnabled": true,
+			"implicitFlowEnabled": false,
+			"directAccessGrantsEnabled": false,
+			"serviceAccountsEnabled": false,
+			"frontchannelLogout": false,
+			"redirectUris": [
+				"http://localhost:8085/api/login/oauth2/code/keycloak",
+				"http://localhost:8080/api/login/oauth2/code/keycloak",
+				"http://localhost:8085/*",
+				"http://localhost:8080/*"
+			],
+			"webOrigins": [
+				"http://localhost:8085",
+				"http://localhost:8080",
+				"http://localhost:*",
+				"http://127.0.0.1:*"
+			],
+			"protocolMappers": [
+				{
+					"name": "realm roles",
+					"protocol": "openid-connect",
+					"protocolMapper": "oidc-usermodel-realm-role-mapper",
+					"consentRequired": false,
+					"config": {
+						"user.attribute": "",
+						"claim.name": "roles",
+						"jsonType.label": "String",
+						"multivalued": "true",
+						"id.token.claim": "true",
+						"access.token.claim": "true",
+						"userinfo.token.claim": "true",
+						"lightweight.claim": "false"
+					}
+				}
+			]
+		},
+		{
+			"clientId": "tpi-postman",
+			"name": "TPI Postman Client",
+			"description": "Cliente público para obtener tokens desde Postman durante la exposición",
+			"enabled": true,
+			"publicClient": true,
+			"protocol": "openid-connect",
+			"standardFlowEnabled": false,
+			"implicitFlowEnabled": false,
+			"directAccessGrantsEnabled": true,
+			"serviceAccountsEnabled": false,
+			"frontchannelLogout": false,
+			"redirectUris": [
+				"http://localhost/*",
+				"http://127.0.0.1/*"
+			],
+			"webOrigins": [
+				"http://localhost",
+				"http://127.0.0.1"
+			]
+		}
+	],
+	"users": [
+		{
+			"username": "cliente01",
+			"enabled": true,
+			"emailVerified": true,
+			"firstName": "Cliente",
+			"lastName": "Demo",
+			"email": "cliente01@tpi.local",
+			"requiredActions": [],
+			"credentials": [
+				{
+					"type": "password",
+					"value": "clave123",
+					"temporary": false
+				}
+			],
+			"realmRoles": [
+				"USER"
+			],
+			"attributes": {
+				"preferred_username": [
+					"cliente01"
+				]
+			}
+		},
+		{
+			"username": "admin",
+			"enabled": true,
+			"emailVerified": true,
+			"firstName": "Admin",
+			"lastName": "TPI",
+			"email": "admin@tpi.local",
+			"requiredActions": [],
+			"credentials": [
+				{
+					"type": "password",
+					"value": "admin123",
+					"temporary": false
+				}
+			],
+			"realmRoles": [
+				"ADMIN",
+				"USER"
+			],
+			"attributes": {
+				"preferred_username": [
+					"admin"
+				]
+			}
+		},
+		{
+			"username": "usuario1",
+			"enabled": true,
+			"emailVerified": true,
+			"firstName": "Usuario",
+			"lastName": "Demo",
+			"email": "usuario1@tpi.local",
+			"requiredActions": [],
+			"credentials": [
+				{
+					"type": "password",
+					"value": "usuario123",
+					"temporary": false
+				}
+			],
+			"realmRoles": [
+				"USER"
+			],
+			"attributes": {
+				"preferred_username": [
+					"usuario1"
+				]
+			}
+		}
+	],
+	"scopeMappings": [],
+	"clientScopeMappings": {},
+	"defaultDefaultClientScopes": [
+		"roles",
+		"profile",
+		"email"
+	],
+	"defaultOptionalClientScopes": [
+		"address",
+		"phone",
+		"offline_access",
+		"microprofile-jwt"
+	]
 }
-
