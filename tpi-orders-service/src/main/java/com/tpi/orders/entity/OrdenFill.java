@@ -9,6 +9,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -16,13 +17,13 @@ import java.time.LocalDateTime;
 public class OrdenFill {
 
     @Id
-    private Integer id;
+    private UUID id;
 
     @Column(name = "buy_order_id", nullable = false)
-    private Integer compraOrdenId;
+    private UUID compraOrdenId;
 
     @Column(name = "sell_order_id", nullable = false)
-    private Integer ventaOrdenId;
+    private UUID ventaOrdenId;
 
     @Column(name = "symbol", nullable = false)
     private String simbolo;
@@ -39,7 +40,7 @@ public class OrdenFill {
     @PrePersist
     void onCreate() {
         if (id == null) {
-            id = (int) (Math.random() * 1000000);
+            id = UUID.randomUUID();
         }
         ejecutadoEn = LocalDateTime.now();
     }

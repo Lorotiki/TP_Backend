@@ -3,33 +3,36 @@ package com.tpi.orders.repository;
 import com.tpi.orders.entity.OrdenEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-public interface OrdenRepository extends JpaRepository<OrdenEntity, Integer> {
+import java.util.UUID;
+
+public interface OrdenRepository extends JpaRepository<OrdenEntity, UUID> {
 
     @Query("""
-            select o from OrderEntity o
-            where o.symbol = :symbol
-              and o.side = :side
-              and o.status in ('PENDING', 'PARTIALLY_FILLED')
-            order by o.limitPrice asc, o.createdAt asc
+            select o from OrdenEntity o
+            where o.simbolo = :symbol
+              and o.lado = :side
+              and o.estado in ('PENDING', 'PARTIALLY_FILLED')
+            order by o.precioLimite asc, o.creadoEn asc
             """)
-    List<OrdenEntity> findCoincidenciasVentas(String symbol, String side);
+    List<OrdenEntity> findCoincidenciasVentas(@Param("symbol") String symbol, @Param("side") String side);
 
     @Query("""
-            select o from OrderEntity o
+            select o from OrdenEntity o
             where o.userId = :userId
-            order by o.createdAt desc
+            order by o.creadoEn desc
             """)
-    List<OrdenEntity> findByUsuarioIdOrdenByCreatedAtDesc(String usuarioId);
+    List<OrdenEntity> findByUsuarioIdOrdenByCreatedAtDesc(@Param("userId") String usuarioId);
 
     @Query("""
-            select o from OrderEntity o
+            select o from OrdenEntity o
             where o.userId = :userId
-              and o.symbol = :symbol
-              and o.side = 'SELL'
-              and o.status in ('PENDING', 'PARTIALLY_FILLED')
+              and o.simbolo = :symbol
+              and o.lado = 'SELL'
+              and o.estado in ('PENDING', 'PARTIALLY_FILLED')
             """)
-    List<OrdenEntity> findOrdenesVentaAbiertas(String usuarioId, String simbolo);
+    List<OrdenEntity> findOrdenesVentaAbiertas(@Param("userId") String usuarioId, @Param("symbol") String simbolo);
 }
 

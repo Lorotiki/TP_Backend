@@ -4,12 +4,12 @@ import java.util.Map;
 import java.util.UUID;
 
 public record HistorialEventosClienteRequest(
-        Integer eventoId,
-        String tipoEvento,
+        UUID eventId,
+        String eventType,
         String userId,
-        Integer ordenId,
-        Integer correlacionId,
-        Integer referenciaId,
+        UUID orderId,
+        UUID correlationId,
+        UUID causationId,
         Map<String, Object> payloadJson
 ) {
 }

@@ -23,17 +23,17 @@ public class OrdenController {
         this.ordenService = ordenService;
     }
 
-    @PostMapping("/ordenes/comprar")
+    @PostMapping("/orders/buy")
     public OrdenResponse comprar(@Valid @RequestBody OrdenRequest request) {
         return ordenService.comprar(request);
     }
 
-    @PostMapping("/ordenes/vender")
+    @PostMapping("/orders/sell")
     public OrdenResponse vender(@Valid @RequestBody OrdenRequest request) {
         return ordenService.vender(request);
     }
 
-    @GetMapping("/users/{userId}/ordenes")
+    @GetMapping("/users/{userId}/orders")
     public List<OrdenResponse> getOrdenes(@PathVariable String userId) {
         return ordenService.getOrdenesByUsuario(userId);
     }

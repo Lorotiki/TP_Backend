@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public record OrdenResponse(
-        Integer ordenId,
+        UUID ordenId,
         String estado,
         BigDecimal cantidad,
         BigDecimal cantidadRestante,

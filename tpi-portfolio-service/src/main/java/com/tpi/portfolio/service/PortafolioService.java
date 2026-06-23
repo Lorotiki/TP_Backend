@@ -12,24 +12,25 @@ import com.tpi.portfolio.repository.CuentaRepository;
 import com.tpi.portfolio.repository.MovimientoDineroRepository;
 import com.tpi.portfolio.repository.PosicionRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Locale;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class PortafolioService {
 
     private final CuentaRepository cuentaRepository;
     private final PosicionRepository posicionRepository;
     private final MovimientoDineroRepository movimientoDineroRepository;
 
-    public PortafolioService(CuentaRepository cuentaRepository,
-                             PosicionRepository posicionRepository,
-                             MovimientoDineroRepository movimientoDineroRepository) {
+    public PortafolioService(CuentaRepository cuentaRepository, PosicionRepository posicionRepository, MovimientoDineroRepository movimientoDineroRepository) {
         this.cuentaRepository = cuentaRepository;
         this.posicionRepository = posicionRepository;
         this.movimientoDineroRepository = movimientoDineroRepository;
@@ -37,120 +38,118 @@ public class PortafolioService {
 
     @Transactional
     public PortafolioResponse getPortafolio(String userId) {
-        var cuenta = getOrCreateCuenta(userId);
-        var posiciones = posicionRepository.findByAccountId(cuenta.getId()).stream()
-                .map(posicion -> new PosicionResponse(posicion.getSymbol(), posicion.getQuantity(), posicion.getAvgPriceArs()))
-                .toList();
-        return new PortafolioResponse(cuenta.getUserId(), cuenta.getBalanceArs(), posiciones);
+        log.info("Buscando o creando portafolio para el usuario: {}", userId);
+        Cuenta cuenta = findOrCreateAccount(userId);
+
+        List<Posicion> posiciones = posicionRepository.findByAccountId(cuenta.getId());
+
+        List<PosicionResponse> posicionResponses = posiciones.stream()
+                .map(p -> new PosicionResponse(p.getSymbol(), p.getQuantity(), p.getAvgPriceArs()))
+                .collect(Collectors.toList());
+
+        log.info("Portafolio encontrado para el usuario: {}. Saldo: {}, Posiciones: {}", userId, cuenta.getBalanceArs(), posicionResponses.size());
+        return new PortafolioResponse(cuenta.getUserId(), cuenta.getBalanceArs(), posicionResponses);
     }
 
     @Transactional
     public DepositoResponse deposito(String userId, DepositoRequest request) {
-        var cuenta = getOrCreateCuenta(userId);
-        cuenta.setBalanceArs(cuenta.getBalanceArs().add(redondeo2Cifras(request.amountArs())));
+        log.info("Procesando depósito para usuario: {}, monto: {}", userId, request.amountArs());
+        Cuenta cuenta = findOrCreateAccount(userId);
+
+        if (request.amountArs().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El monto del depósito debe ser positivo.");
+        }
+
+        cuenta.setBalanceArs(cuenta.getBalanceArs().add(request.amountArs()));
         cuentaRepository.save(cuenta);
 
-        var movimiento = new MovimientoDinero();
-        movimiento.setAccountId(cuenta.getId());
-        movimiento.setType("DEPOSIT");
-        movimiento.setAmountArs(redondeo2Cifras(request.amountArs()));
-        movimiento.setReferenceId(request.referenceId());
-        movimientoDineroRepository.save(movimiento);
+        MovimientoDinero movement = new MovimientoDinero();
+        movement.setAccountId(cuenta.getId());
+        movement.setType("DEPOSIT");
+        movement.setAmountArs(request.amountArs());
+        movement.setReferenceId(request.referenceId());
+        movement = movimientoDineroRepository.save(movement);
 
-        return new DepositoResponse(movimiento.getId(), cuenta.getBalanceArs());
+        log.info("Depósito completado para usuario: {}. Nuevo saldo: {}", userId, cuenta.getBalanceArs());
+        return new DepositoResponse(movement.getId(), cuenta.getBalanceArs());
     }
 
     @Transactional
     public PortafolioResponse aplicarTrade(String userId, TradeAdjustmentRequest request) {
-        var cuenta = getOrCreateCuenta(userId);
-        var side = normalizar(request.side());
-        var simbolo = request.symbol().trim().toUpperCase(Locale.ROOT);
-        var cantidad = request.quantity().setScale(4, RoundingMode.HALF_UP);
-        var precio = redondeo4Cifras(request.priceArs());
-        var totalCuenta = redondeo2Cifras(precio.multiply(cantidad));
+        log.info("Aplicando trade para usuario {}: {} {} de {} @ {}", userId, request.side(), request.quantity(), request.symbol(), request.priceArs());
 
-        //todo revisar
-        if ("BUY".equals(side)) {
-            if (cuenta.getBalanceArs().compareTo(totalCuenta) < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Saldo insuficiente para concretar la compra");
+        Cuenta cuenta = findOrCreateAccount(userId);
+        BigDecimal totalAmount = request.priceArs().multiply(request.quantity());
+
+        if ("BUY".equalsIgnoreCase(request.side())) {
+            // Lógica de Compra
+            if (cuenta.getBalanceArs().compareTo(totalAmount) < 0) {
+                log.error("Saldo insuficiente para el usuario {}. Necesario: {}, Disponible: {}", userId, totalAmount, cuenta.getBalanceArs());
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Saldo insuficiente para realizar la compra.");
             }
-            cuenta.setBalanceArs(cuenta.getBalanceArs().subtract(totalCuenta));
-            var posicion = posicionRepository.findByAccountIdAndSymbol(cuenta.getId(), simbolo)
-                    .orElseGet(() -> createPosition(cuenta.getId(), simbolo));
-            var cantidadActual = defaultCantidad(posicion.getQuantity());
-            var cuentaActual = cantidadActual.multiply(posicion.getAvgPriceArs());
-            var nuevaCantidad = cantidadActual.add(cantidad);
-            var nuevaCuenta = cuentaActual.add(precio.multiply(cantidad));
-            posicion.setQuantity(nuevaCantidad);
-            posicion.setAvgPriceArs(nuevaCuenta.divide(nuevaCantidad, 4, RoundingMode.HALF_UP));
+            cuenta.setBalanceArs(cuenta.getBalanceArs().subtract(totalAmount));
+
+            Posicion posicion = posicionRepository.findByAccountIdAndSymbol(cuenta.getId(), request.symbol())
+                    .orElseGet(() -> {
+                        log.info("Creando nueva posición para el símbolo {} en la cuenta {}", request.symbol(), cuenta.getId());
+                        Posicion nuevaPosicion = new Posicion();
+                        nuevaPosicion.setAccountId(cuenta.getId());
+                        nuevaPosicion.setSymbol(request.symbol());
+                        nuevaPosicion.setQuantity(BigDecimal.ZERO);
+                        nuevaPosicion.setAvgPriceArs(BigDecimal.ZERO);
+                        return nuevaPosicion;
+                    });
+
+            // Recalcular precio promedio ponderado
+            BigDecimal newQuantity = posicion.getQuantity().add(request.quantity());
+            BigDecimal newTotalValue = (posicion.getAvgPriceArs().multiply(posicion.getQuantity())).add(totalAmount);
+            BigDecimal newAvgPrice = newTotalValue.divide(newQuantity, 4, RoundingMode.HALF_UP);
+
+            posicion.setQuantity(newQuantity);
+            posicion.setAvgPriceArs(newAvgPrice);
             posicionRepository.save(posicion);
-            saveMovimiento(cuenta.getId(), "BUY_DEBIT", totalCuenta, request.referenceId());
-        } else if ("SELL".equals(side)) {
-            var posicion = posicionRepository.findByAccountIdAndSymbol(cuenta.getId(), simbolo)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario no posee tenencias para el símbolo " + simbolo));
-            if (posicion.getQuantity().compareTo(cantidad) < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cantidad insuficiente para vender");
+
+        } else if ("SELL".equalsIgnoreCase(request.side())) {
+            // Lógica de Venta
+            Posicion posicion = posicionRepository.findByAccountIdAndSymbol(cuenta.getId(), request.symbol())
+                    .orElseThrow(() -> {
+                        log.error("El usuario {} intentó vender el símbolo {} pero no tiene posición.", userId, request.symbol());
+                        return new ResponseStatusException(HttpStatus.BAD_REQUEST, "No posee acciones del símbolo " + request.symbol() + " para vender.");
+                    });
+
+            if (posicion.getQuantity().compareTo(request.quantity()) < 0) {
+                log.error("Cantidad de acciones insuficiente para el usuario {}. A vender: {}, Disponible: {}", userId, request.quantity(), posicion.getQuantity());
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cantidad de acciones insuficiente para vender.");
             }
-            posicion.setQuantity(posicion.getQuantity().subtract(cantidad));
+
+            posicion.setQuantity(posicion.getQuantity().subtract(request.quantity()));
+            cuenta.setBalanceArs(cuenta.getBalanceArs().add(totalAmount));
+
             if (posicion.getQuantity().compareTo(BigDecimal.ZERO) == 0) {
+                log.info("La cantidad de la posición para el símbolo {} llegó a cero. Eliminando posición.", request.symbol());
                 posicionRepository.delete(posicion);
             } else {
                 posicionRepository.save(posicion);
             }
-            cuenta.setBalanceArs(cuenta.getBalanceArs().add(totalCuenta));
-            saveMovimiento(cuenta.getId(), "SELL_CREDIT", totalCuenta, request.referenceId());
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lado de operación inválido");
         }
 
         cuentaRepository.save(cuenta);
+        log.info("Trade aplicado exitosamente para el usuario {}. Nuevo saldo: {}", userId, cuenta.getBalanceArs());
         return getPortafolio(userId);
     }
 
-    private Posicion createPosition(java.util.UUID accountId, String symbol) {
-        var posicion = new Posicion();
-        posicion.setAccountId(accountId);
-        posicion.setSymbol(symbol);
-        posicion.setQuantity(BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP));
-        posicion.setAvgPriceArs(BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP));
-        return posicion;
-    }
-
-    private BigDecimal defaultCantidad(BigDecimal cantidad) {
-        return cantidad == null ? BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP) : cantidad;
-    }
-
-    private void saveMovimiento(java.util.UUID accountId, String type, BigDecimal amount, String referenceId) {
-        var movimiento = new MovimientoDinero();
-        movimiento.setAccountId(accountId);
-        movimiento.setType(type);
-        movimiento.setAmountArs(redondeo2Cifras(amount));
-        movimiento.setReferenceId(referenceId);
-        movimientoDineroRepository.save(movimiento);
-    }
-
-    private Cuenta getOrCreateCuenta(String userId) {
+    /**
+     * Busca una cuenta por userId. Si no la encuentra, crea una nueva con saldo cero.
+     * Este método es clave para evitar NullPointerExceptions.
+     */
+    private Cuenta findOrCreateAccount(String userId) {
         return cuentaRepository.findByUserId(userId)
-                .orElseGet(() -> cuentaRepository.save(createCuenta(userId)));
-    }
-
-    private Cuenta createCuenta(String userId) {
-        var account = new Cuenta();
-        account.setUserId(userId);
-        account.setBalanceArs(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
-        return account;
-    }
-
-    private String normalizar(String side) {
-        return side == null ? "" : side.trim().toUpperCase(Locale.ROOT);
-    }
-
-    private BigDecimal redondeo2Cifras(BigDecimal value) {
-        return value.setScale(2, RoundingMode.HALF_UP);
-    }
-
-    private BigDecimal redondeo4Cifras(BigDecimal value) {
-        return value.setScale(4, RoundingMode.HALF_UP);
+                .orElseGet(() -> {
+                    log.info("No se encontró cuenta para el usuario: {}. Creando una nueva.", userId);
+                    Cuenta nuevaCuenta = new Cuenta();
+                    nuevaCuenta.setUserId(userId);
+                    nuevaCuenta.setBalanceArs(BigDecimal.ZERO);
+                    return cuentaRepository.save(nuevaCuenta);
+                });
     }
 }
-

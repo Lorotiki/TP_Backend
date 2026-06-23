@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "cash_movements", schema = "portfolio")
+@Table(name = "cash_movements")
 public class MovimientoDinero {
 
     @Id

@@ -33,9 +33,8 @@ public class PortafolioController {
         return portafolioService.deposito(userId, request);
     }
 
-    @PostMapping("/portfolio/trades")
+    @PostMapping("/trades")
     public PortafolioResponse applyTrade(@PathVariable String userId, @Valid @RequestBody TradeAdjustmentRequest request) {
         return portafolioService.aplicarTrade(userId, request);
     }
 }
-

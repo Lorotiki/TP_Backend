@@ -351,11 +351,11 @@ public class OrdenService {
             payload.put("mensaje", mensaje);
 
             var request = new HistorialEventosClienteRequest(
-                    new java.util.Random().nextInt(),
+                    java.util.UUID.randomUUID(),
                     tipoEvento,
                     orden.getUserId(),
                     orden.getId(),
-                    new java.util.Random().nextInt(),
+                    orden.getId(),
                     null,
                     payload
             );

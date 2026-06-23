@@ -36,6 +36,7 @@ services:
       KC_DB_PASSWORD: admin
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME: localhost
       KEYCLOAK_LOGLEVEL: INFO
     ports:
       - "8180:8080"
@@ -146,6 +147,11 @@ services:
     environment:
       SERVER_PORT: 8085
       KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/tpi
+      MARKET_DATA_URI: http://market-data-service:8081
+      PORTFOLIO_URI: http://portfolio-service:8082
+      ORDERS_URI: http://orders-service:8083
+      HISTORY_URI: http://history-service:8084
     depends_on:
       - keycloak
       - market-data-service

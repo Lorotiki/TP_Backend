@@ -24,6 +24,7 @@ public class SecurityConfig {
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers(HttpMethod.GET, "/quotes/**").permitAll()
                     .pathMatchers(HttpMethod.GET, "/api/login/oauth2/code/keycloak").permitAll()
+                    .pathMatchers(HttpMethod.GET, "/api/login/oauth2/debug-token").permitAll()
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/admin/**").hasRole("ADMIN")
                         .anyExchange().authenticated())

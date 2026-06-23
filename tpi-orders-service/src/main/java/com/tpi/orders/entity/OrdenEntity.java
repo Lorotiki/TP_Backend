@@ -10,14 +10,15 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "orders", schema = "orders")
+@Table(name = "orders")
 public class OrdenEntity {
 
     @Id
-    private Integer id;
+    private UUID id;
 
     @Column(name = "user_id", nullable = false)
     private String userId;
@@ -49,7 +50,7 @@ public class OrdenEntity {
     @PrePersist
     void onCreate() {
         if (id == null) {
-            id = (int) (Math.random() * 1000000);
+            id = UUID.randomUUID();
         }
         var now = LocalDateTime.now();
         creadoEn = now;
