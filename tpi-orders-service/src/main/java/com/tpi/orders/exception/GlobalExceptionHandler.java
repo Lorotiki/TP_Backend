@@ -1,47 +1,34 @@
 package com.tpi.orders.exception;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
+import java.util.Map;
 
-@RestControllerAdvice
-@Slf4j
+@ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ErrorResponse> handleResponseStatusException(ResponseStatusException e) {
-        log.warn("Orders - ResponseStatusException: {} - {}", e.getStatusCode(), e.getReason());
-
-        return ResponseEntity
-                .status(e.getStatusCode())
-                .body(new ErrorResponse(
-                        e.getStatusCode().value(),
-                        e.getReason() != null ? e.getReason() : "Error en la solicitud",
-                        OffsetDateTime.now()
-                ));
+    public ResponseEntity<Map<String, Object>> handleResponseStatusException(ResponseStatusException ex) {
+        Map<String, Object> body = Map.of(
+                "timestamp", Instant.now(),
+                "status", ex.getStatusCode().value(),
+                "error", ex.getReason()
+        );
+        return new ResponseEntity<>(body, ex.getStatusCode());
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneralException(Exception e) {
-        log.error("Orders - Excepción inesperada", e);
-
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse(
-                        500,
-                        "Error interno del servidor",
-                        OffsetDateTime.now()
-                ));
+    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
+        Map<String, Object> body = Map.of(
+                "timestamp", Instant.now(),
+                "status", 500,
+                "error", "Error interno del servidor: " + ex.getMessage()
+        );
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
-
-record ErrorResponse(
-        int code,
-        String message,
-        OffsetDateTime timestamp
-) {}

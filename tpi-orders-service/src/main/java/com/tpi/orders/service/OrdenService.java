@@ -46,11 +46,23 @@ public class OrdenService {
     }
 
     @Transactional
-    public OrdenResponse vender(OrdenRequest request) {
-        log.info(" Procesando orden de venta: usuarioID={}, simbolo={}, cantidad={}, precioLimite={}",
-                request.userId(), request.simbolo(), request.cantidad(), request.precioLimite());
+    public OrdenResponse createOrden(OrdenRequest request) {
+        log.info("▶ Procesando orden: lado={}, usuario={}, simbolo={}, cantidad={}, precioLimite={}",
+                request.side(), request.userId(), request.symbol(), request.quantity(), request.limitPrice());
+
+        if ("BUY".equalsIgnoreCase(request.side())) {
+            return procesarCompra(request);
+        } else if ("SELL".equalsIgnoreCase(request.side())) {
+            return procesarVenta(request);
+        } else {
+            // Esta validación es una salvaguarda; @Pattern en el DTO debería atrapar esto primero.
+            throw new IllegalArgumentException("El campo 'side' debe ser 'BUY' o 'SELL'.");
+        }
+    }
+
+    private OrdenResponse procesarVenta(OrdenRequest request) {
         try {
-            var orden = createOrden(request, "SELL");
+            var orden = createOrdenEntity(request);
             validaDisponibilidadAcciones(orden);
             orden.setEstado("PENDING");
             ordenRepository.save(orden);
@@ -59,36 +71,30 @@ public class OrdenService {
                     orden.getId(), orden.getEstado());
 
             recordHistorial("SELL_ORDER_CREATED",
-                            orden, //orden
-                            orden.getCantidad(), //cantidad
-                            orden.getCantidadRestante(), //cantidadRemaninete
-                            orden.getPrecioLimite(), //precio limite
-                            "Orden de venta registrada");
+                    orden,
+                    orden.getCantidad(),
+                    orden.getCantidadRestante(),
+                    orden.getPrecioLimite(),
+                    "Orden de venta registrada");
 
             return toResponse(orden, BigDecimal.ZERO, orden.getCantidadRestante(),
                     orden.getPrecioLimite(), "Orden de venta registrada");
         } catch (Exception e) {
             log.error("Error procesando orden de venta: usuarioID={}, simbolo={}",
-                    request.userId(), request.simbolo(), e);
+                    request.userId(), request.symbol(), e);
             throw e;
         }
     }
 
-    @Transactional
-    public OrdenResponse comprar(OrdenRequest request) {
-        log.info("▶ Procesando orden de compra: usuario={}, simbolo={}, cantidad={}, precioLimite={}",
-                request.userId(), request.simbolo(), request.cantidad(), request.precioLimite());
-
+    private OrdenResponse procesarCompra(OrdenRequest request) {
         try {
-            // Consultar cotización
-            var cotizacionMercado = obtenerCotizacion(request.simbolo());
+            var cotizacionMercado = obtenerCotizacion(request.symbol());
             log.debug("Cotización obtenida: simbolo={}, precio={}, moneda={}",
                     cotizacionMercado.simbolo(), cotizacionMercado.precio(), cotizacionMercado.moneda());
 
-            var orden = createOrden(request, "BUY");
+            var orden = createOrdenEntity(request);
             log.debug(" Orden creada: nroOrden={}", orden.getId());
 
-            // Validar balance
             validaSaldoUsuario(orden, cotizacionMercado.precio());
             log.debug(" Balance validado: saldoRequerido={} ARS",
                     orden.getCantidad().multiply(orden.getPrecioLimite()));
@@ -96,7 +102,6 @@ public class OrdenService {
             ordenRepository.save(orden);
             log.debug(" Orden persistida en BD");
 
-            // Matching
             var vendedoresDisponibles = ordenRepository.findCoincidenciasVentas(orden.getSimbolo(), "SELL");
             log.debug("Encontradas {} órdenes de venta disponibles", vendedoresDisponibles.size());
 
@@ -137,8 +142,6 @@ public class OrdenService {
                 ejecutarCompraXPortafolio(vendedor.getUserId(), "SELL", vendedor.getSimbolo(), cantidad,
                         precioVenta, vendedor.getId().toString());
 
-                //to-do deberia hacerse en el evento q ejecuta la compra y la venta anteriores
-
                 vendedor.setCantidadRestante(vendedor.getCantidadRestante().subtract(cantidad));
                 vendedor.setEstado(resolveStatus(vendedor.getCantidadRestante(), vendedor.getCantidad()));
                 orden.setCantidadRestante(orden.getCantidadRestante().subtract(cantidad));
@@ -157,8 +160,7 @@ public class OrdenService {
             return toResponse(orden, cantidades, orden.getCantidadRestante(),
                     orden.getPrecioLimite(), "Orden de compra ejecutada");
         } catch (Exception e) {
-            log.error("Error procesando orden de compra: usuarioID={}, simbolo={}",
-                    request.userId(), request.simbolo(), e);
+            log.error("Error procesando orden de compra: usuarioID={}, simbolo={}", request.userId(), request.symbol(), e);
             throw e;
         }
     }
@@ -177,7 +179,7 @@ public class OrdenService {
     private void ejecutarCompraXPortafolio(String usuarioId, String lado, String simbolo, BigDecimal cantidad, BigDecimal precioArs, String referenciaId) {
         var request = new PortafolioTradeClienteRequest(lado, simbolo, cantidad, precioArs, referenciaId);
         try {
-            restTemplate.postForEntity(portafolioUrl + "/users/" + usuarioId + "/portfolio/trades", request,
+            restTemplate.postForEntity(portafolioUrl + "/users/" + usuarioId + "/trades", request,
                     Void.class);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "No se pudo actualizar portfolio-service", e);
@@ -250,14 +252,14 @@ public class OrdenService {
         }
     }
 
-    private OrdenEntity createOrden(OrdenRequest request, String lado) {
+    private OrdenEntity createOrdenEntity(OrdenRequest request) {
         var orden = new OrdenEntity();
         orden.setUserId(request.userId());
-        orden.setSimbolo(request.simbolo().trim().toUpperCase(Locale.ROOT));
-        orden.setLado(lado);
-        orden.setCantidad(request.cantidad().setScale(4, RoundingMode.HALF_UP));
-        orden.setCantidadRestante(request.cantidad().setScale(4, RoundingMode.HALF_UP));
-        orden.setPrecioLimite(request.precioLimite().setScale(4, RoundingMode.HALF_UP));
+        orden.setSimbolo(request.symbol().trim().toUpperCase(Locale.ROOT));
+        orden.setLado(request.side());
+        orden.setCantidad(request.quantity().setScale(4, RoundingMode.HALF_UP));
+        orden.setCantidadRestante(request.quantity().setScale(4, RoundingMode.HALF_UP));
+        orden.setPrecioLimite(request.limitPrice().setScale(4, RoundingMode.HALF_UP));
         orden.setEstado("PENDING");
         return orden;
     }

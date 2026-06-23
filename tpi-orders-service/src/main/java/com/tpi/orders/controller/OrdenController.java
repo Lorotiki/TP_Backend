@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping
+@RequestMapping("/orders")
 public class OrdenController {
 
     private final OrdenService ordenService;
@@ -23,19 +23,13 @@ public class OrdenController {
         this.ordenService = ordenService;
     }
 
-    @PostMapping("/orders/buy")
-    public OrdenResponse comprar(@Valid @RequestBody OrdenRequest request) {
-        return ordenService.comprar(request);
+    @PostMapping
+    public OrdenResponse createOrden(@Valid @RequestBody OrdenRequest request) {
+        return ordenService.createOrden(request);
     }
 
-    @PostMapping("/orders/sell")
-    public OrdenResponse vender(@Valid @RequestBody OrdenRequest request) {
-        return ordenService.vender(request);
-    }
-
-    @GetMapping("/users/{userId}/orders")
+    @GetMapping("/user/{userId}")
     public List<OrdenResponse> getOrdenes(@PathVariable String userId) {
         return ordenService.getOrdenesByUsuario(userId);
     }
 }
-
