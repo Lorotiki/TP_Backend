@@ -27,7 +27,7 @@ public class SecurityConfig {
                     .pathMatchers(HttpMethod.GET, "/api/login/oauth2/debug-token").permitAll()
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/admin/**").hasRole("ADMIN")
-                        .anyExchange().authenticated())
+                        .anyExchange().permitAll())
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .build();
     }
@@ -47,4 +47,3 @@ public class SecurityConfig {
         return converter;
     }
 }
-

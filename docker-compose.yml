@@ -146,12 +146,11 @@ services:
       - "8085:8085"
     environment:
       SERVER_PORT: 8085
-      KEYCLOAK_URL: http://keycloak:8080
-      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/tpi
-      MARKET_DATA_URI: http://market-data-service:8081
-      PORTFOLIO_URI: http://portfolio-service:8082
-      ORDERS_URI: http://orders-service:8083
-      HISTORY_URI: http://history-service:8084
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER-URI: http://keycloak:8080/realms/tpi
+      SERVICES_URI_MARKET-DATA: http://market-data-service:8081
+      SERVICES_URI_PORTFOLIO: http://portfolio-service:8082
+      SERVICES_URI_ORDERS: http://orders-service:8083
+      SERVICES_URI_HISTORY: http://history-service:8084
     depends_on:
       - keycloak
       - market-data-service
