@@ -1,4 +1,6 @@
-com\tpi\gateway\exception\GlobalExceptionHandler.class
-com\tpi\gateway\ApiGatewayApplication.class
-com\tpi\gateway\config\SecurityConfig.class
-com\tpi\gateway\exception\ErrorResponse.class
+com/tpi/gateway/exception/GlobalExceptionHandler.class
+com/tpi/gateway/controller/KeycloakAuthController.class
+com/tpi/gateway/ApiGatewayApplication.class
+com/tpi/gateway/config/RouteLocatorConfig.class
+com/tpi/gateway/config/SecurityConfig.class
+com/tpi/gateway/exception/ErrorResponse.class

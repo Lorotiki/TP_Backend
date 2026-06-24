@@ -2,6 +2,7 @@ package com.tpi.orders.service;
 
 import com.tpi.orders.dto.*;
 import com.tpi.orders.entity.OrdenEntity;
+import com.tpi.orders.entity.OrdenFill;
 import com.tpi.orders.repository.OrdenFillRepository;
 import com.tpi.orders.repository.OrdenRepository;
 
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.ArrayList;
 
 @Service
 @Slf4j
@@ -106,6 +108,7 @@ public class OrdenService {
             log.debug("Encontradas {} órdenes de venta disponibles", vendedoresDisponibles.size());
 
             var cantidades = BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP);
+            List<OrdenEntity> vendedoresActualizados = new ArrayList<>();
 
             for (var vendedor : vendedoresDisponibles) {
                 if (orden.getCantidadRestante().compareTo(BigDecimal.ZERO) == 0) {
@@ -146,11 +149,34 @@ public class OrdenService {
                 vendedor.setEstado(resolveStatus(vendedor.getCantidadRestante(), vendedor.getCantidad()));
                 orden.setCantidadRestante(orden.getCantidadRestante().subtract(cantidad));
                 orden.setEstado(resolveStatus(orden.getCantidadRestante(), orden.getCantidad()));
+                vendedoresActualizados.add(vendedor);
+
+                var fill = new OrdenFill();
+                fill.setCompraOrdenId(orden.getId());
+                fill.setVentaOrdenId(vendedor.getId());
+                fill.setSimbolo(orden.getSimbolo());
+                fill.setCantidad(cantidad.setScale(4, RoundingMode.HALF_UP));
+                fill.setPrecioArs(precioVenta);
+                ordenFillRepository.save(fill);
+
+                recordHistorial("SELL_ORDER_EXECUTED", vendedor, cantidad, vendedor.getCantidadRestante(),
+                        precioVenta, "Orden de venta ejecutada");
 
                 cantidades = cantidades.add(cantidad);
             }
 
-            ordenRepository.saveAll(List.of(orden));
+            if (cantidades.compareTo(BigDecimal.ZERO) == 0) {
+                orden.setEstado("REJECTED");
+                ordenRepository.save(orden);
+                recordHistorial("BUY_ORDER_REJECTED", orden, BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP),
+                        orden.getCantidadRestante(), orden.getPrecioLimite(),
+                        "Orden de compra rechazada: no hay ofertas compatibles");
+                return toResponse(orden, BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP), orden.getCantidadRestante(),
+                        orden.getPrecioLimite(), "Orden de compra rechazada: no hay ofertas compatibles");
+            }
+
+            vendedoresActualizados.add(orden);
+            ordenRepository.saveAll(vendedoresActualizados);
             recordHistorial("BUY_ORDER_EXECUTED", orden, cantidades, orden.getCantidadRestante(),
                     orden.getPrecioLimite(), "Orden de compra ejecutada");
 
@@ -206,6 +232,12 @@ public class OrdenService {
                         "Portafolio no encontrado para el usuario");
             }
 
+            if (portafolio.valorTotalArs() == null) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_GATEWAY,
+                        "Respuesta invalida de portfolio-service: falta balanceArs");
+            }
+
             // Calcular monto requerido
             BigDecimal montoRequerido = orden.getCantidad()
                     .multiply(orden.getPrecioLimite())
@@ -227,6 +259,8 @@ public class OrdenService {
 
             log.debug("Balance validado correctamente");
 
+        } catch (ResponseStatusException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error validando balance: {}", e.getMessage(), e);
             throw new ResponseStatusException(
@@ -299,6 +333,12 @@ public class OrdenService {
                 throw new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Portafolio no encontrado para el usuario");
+            }
+
+            if (portafolio.posiciones() == null) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_GATEWAY,
+                        "Respuesta invalida de portfolio-service: falta positions");
             }
 
             // Buscar la posición del símbolo

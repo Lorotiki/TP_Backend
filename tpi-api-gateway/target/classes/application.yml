@@ -16,7 +16,7 @@ spring:
         - id: portfolio
           uri: ${PORTFOLIO_URI:http://portfolio-service:8082}
           predicates:
-            - Path=/users/*/portfolio,/users/*/deposits,/users/*/portfolio/trades
+            - Path=/users/*/portfolio,/users/*/deposits,/users/*/trades
         - id: orders
           uri: ${ORDERS_URI:http://orders-service:8083}
           predicates:

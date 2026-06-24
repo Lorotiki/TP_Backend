@@ -10,7 +10,7 @@
 			"name": "Paso 1: Autenticación",
 			"item": [
 				{
-					"name": "1.1 Obtener Token de Usuario (juan@example.com)",
+					"name": "1.1 Obtener Token de Usuario (cliente01)",
 					"event": [
 						{
 							"listen": "test",
@@ -30,7 +30,7 @@
 							"urlencoded": [
 								{
 									"key": "client_id",
-									"value": "tpi-client"
+												"value": "tpi-postman"
 								},
 								{
 									"key": "username",
@@ -38,7 +38,7 @@
 								},
 								{
 									"key": "password",
-									"value": "password"
+												"value": "clave123"
 								},
 								{
 									"key": "grant_type",
@@ -83,7 +83,7 @@
 							"urlencoded": [
 								{
 									"key": "client_id",
-									"value": "tpi-client"
+												"value": "tpi-postman"
 								},
 								{
 									"key": "username",
@@ -91,7 +91,7 @@
 								},
 								{
 									"key": "password",
-									"value": "admin"
+												"value": "admin123"
 								},
 								{
 									"key": "grant_type",
@@ -154,12 +154,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{gateway_url}}/portfolio/users/juan@example.com/portfolio",
+							"raw": "{{gateway_url}}/users/juan@example.com/portfolio",
 							"host": [
 								"{{gateway_url}}"
 							],
 							"path": [
-								"portfolio",
 								"users",
 								"juan@example.com",
 								"portfolio"
@@ -220,12 +219,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{gateway_url}}/portfolio/users/juan@example.com/portfolio",
+							"raw": "{{gateway_url}}/users/juan@example.com/portfolio",
 							"host": [
 								"{{gateway_url}}"
 							],
 							"path": [
-								"portfolio",
 								"users",
 								"juan@example.com",
 								"portfolio"
@@ -250,15 +248,238 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{gateway_url}}/history/users/juan@example.com/events",
+							"raw": "{{gateway_url}}/users/juan@example.com/history",
 							"host": [
 								"{{gateway_url}}"
 							],
 							"path": [
-								"history",
 								"users",
 								"juan@example.com",
-								"events"
+								"history"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.6 Verificar Portfolio Vendedor (ana@example.com)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_url}}/users/ana@example.com/portfolio",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"users",
+								"ana@example.com",
+								"portfolio"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.7 Crear Orden de Venta (ana@example.com / NVDA x20 @ 35000)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"ana@example.com\",\n  \"symbol\": \"NVDA\",\n  \"side\": \"SELL\",\n  \"quantity\": 20,\n  \"limitPrice\": 35000.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/orders",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.8 Crear Orden de Compra Parcial (juan@example.com / NVDA x10 @ 36000)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"juan@example.com\",\n  \"symbol\": \"NVDA\",\n  \"side\": \"BUY\",\n  \"quantity\": 10,\n  \"limitPrice\": 36000.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/orders",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.9 Consultar Órdenes Comprador (juan@example.com)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_url}}/orders/user/juan@example.com",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"orders",
+								"user",
+								"juan@example.com"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.10 Consultar Órdenes Vendedor (ana@example.com)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_url}}/orders/user/ana@example.com",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"orders",
+								"user",
+								"ana@example.com"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.11 Crear Orden de Compra Rechazada por Precio (juan@example.com / NVDA x5 @ 30000)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"juan@example.com\",\n  \"symbol\": \"NVDA\",\n  \"side\": \"BUY\",\n  \"quantity\": 5,\n  \"limitPrice\": 30000.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/orders",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.12 Historial Usuario (juan@example.com)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_url}}/users/juan@example.com/history",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"users",
+								"juan@example.com",
+								"history"
 							]
 						}
 					},
@@ -285,14 +506,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{gateway_url}}/history/admin/events",
+							"raw": "{{gateway_url}}/admin/history",
 							"host": [
 								"{{gateway_url}}"
 							],
 							"path": [
-								"history",
 								"admin",
-								"events"
+								"history"
 							]
 						}
 					},
@@ -314,14 +534,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{gateway_url}}/history/admin/events",
+							"raw": "{{gateway_url}}/admin/history",
 							"host": [
 								"{{gateway_url}}"
 							],
 							"path": [
-								"history",
 								"admin",
-								"events"
+								"history"
 							]
 						}
 					},
@@ -358,6 +577,14 @@
 		{
 			"key": "keycloak_url",
 			"value": "http://localhost:8180"
+		},
+		{
+			"key": "default_buyer_user_id",
+			"value": "juan@example.com"
+		},
+		{
+			"key": "default_seller_user_id",
+			"value": "ana@example.com"
 		}
 	]
 }

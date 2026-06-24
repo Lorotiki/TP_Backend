@@ -72,7 +72,8 @@ public class CotizacionMercadoService {
         
         BigDecimal precioARS = convertirMonedaAPesosArg(new BigDecimal(precioUSD), moneda);
         
-        return new CotizacionResponse(simbolo, precioARS, "ARS", "YAHOO_FINANCE", OffsetDateTime.now());
+     //   return new CotizacionResponse(simbolo, precioARS, "ARS", "YAHOO_FINANCE", OffsetDateTime.now());
+        return new CotizacionResponse(simbolo, precioARS, nombre, "ARS",OffsetDateTime.now());
     }
 
     private BigDecimal convertirMonedaAPesosArg(BigDecimal precio, String moneda) {
