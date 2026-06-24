@@ -1,0 +1,1820 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "TPI Backend 2026 - API consolidada",
+    "version": "1.0.0",
+    "description": "Especificación OpenAPI consolidada generada a partir del código fuente presente en el workspace. Incluye los microservicios `tpi-api-gateway`, `tpi-market-data-service`, `tpi-portfolio-service`, `tpi-orders-service` y `tpi-history-service`.\n\nImportante: las rutas actuales del proyecto no están versionadas en código (`/api/v1/...` no existe hoy). Por fidelidad con la implementación, esta especificación documenta las rutas tal como están expuestas en los controladores.\n\nTambién se documentan discrepancias detectadas entre controladores y exposición vía gateway cuando corresponden.",
+    "contact": {
+      "name": "Equipo TPI Backend"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8085",
+      "description": "API Gateway"
+    },
+    {
+      "url": "http://localhost:8081",
+      "description": "tpi-market-data-service"
+    },
+    {
+      "url": "http://localhost:8082",
+      "description": "tpi-portfolio-service"
+    },
+    {
+      "url": "http://localhost:8083",
+      "description": "tpi-orders-service"
+    },
+    {
+      "url": "http://localhost:8084",
+      "description": "tpi-history-service"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Gateway Auth",
+      "description": "Endpoints del gateway relacionados con OAuth2/JWT y depuración de tokens."
+    },
+    {
+      "name": "Market Data",
+      "description": "Consulta pública de cotizaciones de mercado."
+    },
+    {
+      "name": "Portfolio",
+      "description": "Consulta de portafolio, depósitos y aplicación de trades."
+    },
+    {
+      "name": "Orders",
+      "description": "Alta y consulta de órdenes de compra/venta."
+    },
+    {
+      "name": "History",
+      "description": "Auditoría e historial de eventos del sistema."
+    }
+  ],
+  "paths": {
+    "/quotes/{simbolo}": {
+      "get": {
+        "tags": [
+          "Market Data"
+        ],
+        "summary": "Obtener cotización por símbolo",
+        "description": "Devuelve la cotización de un símbolo consultando Yahoo Finance y convirtiendo el valor a ARS. Este endpoint es público en el gateway.\n\nNota de fidelidad: el DTO actual expone los campos `compañia`, `moneda` y `marcaTiempo`; sin embargo, la implementación actual carga `compañia=ARS` y `moneda=YAHOO_FINANCE`, lo que revela una inconsistencia entre nombres de campos y valores retornados.",
+        "operationId": "getCotizacion",
+        "servers": [
+          {
+            "url": "http://localhost:8085",
+            "description": "Expuesto por API Gateway"
+          },
+          {
+            "url": "http://localhost:8081",
+            "description": "Microservicio directo"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "simbolo",
+            "in": "path",
+            "required": true,
+            "description": "Ticker bursátil a consultar.",
+            "schema": {
+              "type": "string",
+              "example": "AAPL"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cotización obtenida correctamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CotizacionResponse"
+                },
+                "examples": {
+                  "ok": {
+                    "value": {
+                      "simbolo": "AAPL",
+                      "precio": 124000.00,
+                      "compañia": "ARS",
+                      "moneda": "YAHOO_FINANCE",
+                      "marcaTiempo": "2026-06-23T18:45:30Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/StandardBadRequest"
+          },
+          "404": {
+            "description": "Símbolo o ruta no encontrada. El controlador no devuelve 404 de negocio explícito, pero puede ocurrir por enrutamiento o recurso inexistente aguas arriba.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardErrorResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "value": {
+                      "code": 404,
+                      "message": "Recurso no encontrado",
+                      "timestamp": "2026-06-23T18:45:30Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/StandardInternalError"
+          },
+          "503": {
+            "description": "No se pudo obtener la cotización desde el proveedor externo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardErrorResponse"
+                },
+                "examples": {
+                  "providerUnavailable": {
+                    "value": {
+                      "code": 503,
+                      "message": "No se pudo obtener la cotización para AAPL",
+                      "timestamp": "2026-06-23T18:45:30Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{userId}/portfolio": {
+      "get": {
+        "tags": [
+          "Portfolio"
+        ],
+        "summary": "Consultar portafolio de un usuario",
+        "description": "Recupera el portafolio de un usuario. Si la cuenta no existe, el servicio la crea on-demand con saldo cero.",
+        "operationId": "getPortafolio",
+        "servers": [
+          {
+            "url": "http://localhost:8085",
+            "description": "Expuesto por API Gateway"
+          },
+          {
+            "url": "http://localhost:8082",
+            "description": "Microservicio directo"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "Identificador del usuario.",
+            "schema": {
+              "type": "string",
+              "example": "juan@example.com"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portafolio obtenido correctamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortafolioResponse"
+                },
+                "examples": {
+                  "ok": {
+                    "value": {
+                      "userId": "juan@example.com",
+                      "balanceArs": 50000.00,
+                      "positions": [
+                        {
+                          "symbol": "AAPL",
+                          "quantity": 100.0000,
+                          "avgPriceArs": 150.5000
+                        },
+                        {
+                          "symbol": "GOOGL",
+                          "quantity": 50.0000,
+                          "avgPriceArs": 140.2500
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/StandardBadRequest"
+          },
+          "404": {
+            "description": "No se devuelve 404 de negocio en la implementación actual, porque la cuenta se crea automáticamente. Este código puede aparecer sólo por routing o infraestructura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/StandardInternalError"
+          }
+        }
+      }
+    },
+    "/users/{userId}/deposits": {
+      "post": {
+        "tags": [
+          "Portfolio"
+        ],
+        "summary": "Registrar depósito en ARS",
+        "description": "Acredita un depósito en la cuenta del usuario y registra un movimiento de dinero.",
+        "operationId": "deposito",
+        "servers": [
+          {
+            "url": "http://localhost:8085",
+            "description": "Expuesto por API Gateway"
+          },
+          {
+            "url": "http://localhost:8082",
+            "description": "Microservicio directo"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "Identificador del usuario.",
+            "schema": {
+              "type": "string",
+              "example": "juan@example.com"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DepositoRequest"
+              },
+              "examples": {
+                "deposito": {
+                  "value": {
+                    "amountArs": 25000.00,
+                    "referenceId": "DEP-20260623-001"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Depósito registrado correctamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DepositoResponse"
+                },
+                "examples": {
+                  "ok": {
+                    "value": {
+                      "movementId": "f084b2ce-7ed4-4a1f-b52c-cae1bdfd9bc2",
+                      "balanceArs": 75000.00
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud inválida o monto no positivo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardErrorResponse"
+                },
+                "examples": {
+                  "validation": {
+                    "value": {
+                      "code": 400,
+                      "message": "El monto del depósito debe ser positivo.",
+                      "timestamp": "2026-06-23T18:45:30Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No se devuelve 404 de negocio explícito en la implementación actual.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/StandardInternalError"
+          }
+        }
+      }
+    },
+    "/users/{userId}/trades": {
+      "post": {
+        "tags": [
+          "Portfolio"
+        ],
+        "summary": "Aplicar ajuste de trade al portafolio",
+        "description": "Aplica un trade de compra o venta directamente sobre el portafolio del usuario.\n\nDiscrepancia detectada: el controlador expone `/users/{userId}/trades`, pero el gateway actual no enruta esta ruta de forma consistente (`RouteLocatorConfig` no la incluye y `application.yml` declara `/users/*/portfolio/trades`). Por eso esta operación se documenta sólo contra el microservicio directo.",
+        "operationId": "applyTrade",
+        "servers": [
+          {
+            "url": "http://localhost:8082",
+            "description": "Microservicio directo"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "Identificador del usuario.",
+            "schema": {
+              "type": "string",
+              "example": "juan@example.com"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeAdjustmentRequest"
+              },
+              "examples": {
+                "buyTrade": {
+                  "value": {
+                    "side": "BUY",
+                    "symbol": "META",
+                    "quantity": 10.0000,
+                    "priceArs": 335.0000,
+                    "referenceId": "ORDER-7b24d38d"
+                  }
+                },
+                "sellTrade": {
+                  "value": {
+                    "side": "SELL",
+                    "symbol": "AAPL",
+                    "quantity": 5.0000,
+                    "priceArs": 155.0000,
+                    "referenceId": "ORDER-3dc1a0b9"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Trade aplicado correctamente y portafolio actualizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortafolioResponse"
+                },
+                "examples": {
+                  "ok": {
+                    "value": {
+                      "userId": "juan@example.com",
+                      "balanceArs": 46650.00,
+                      "positions": [
+                        {
+                          "symbol": "META",
+                          "quantity": 10.0000,
+                          "avgPriceArs": 335.0000
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Saldo insuficiente, posición inexistente o cantidad insuficiente para vender.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardErrorResponse"
+                },
+                "examples": {
+                  "saldoInsuficiente": {
+                    "value": {
+                      "code": 400,
+                      "message": "Saldo insuficiente para realizar la compra.",
+                      "timestamp": "2026-06-23T18:45:30Z"
+                    }
+                  },
+                  "sinPosicion": {
+                    "value": {
+                      "code": 400,
+                      "message": "No posee acciones del símbolo AAPL para vender.",
+                      "timestamp": "2026-06-23T18:45:30Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No se devuelve 404 de negocio explícito en la implementación actual.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/StandardInternalError"
+          }
+        }
+      }
+    },
+    "/orders": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Crear orden de compra o venta",
+        "description": "Registra una orden de compra (`BUY`) o venta (`SELL`). Para compras, el servicio valida saldo, consulta cotización y hace matching síncrono con órdenes de venta compatibles. Para ventas, valida tenencias disponibles. Además registra eventos en history-service.\n\nObservación de implementación: algunos errores que conceptualmente podrían ser `404` o `502` terminan devolviendo `500` por cómo están capturadas las excepciones internas.",
+        "operationId": "createOrden",
+        "servers": [
+          {
+            "url": "http://localhost:8085",
+            "description": "Expuesto por API Gateway"
+          },
+          {
+            "url": "http://localhost:8083",
+            "description": "Microservicio directo"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrdenRequest"
+              },
+              "examples": {
+                "buyOrder": {
+                  "value": {
+                    "userId": "juan@example.com",
+                    "symbol": "META",
+                    "side": "BUY",
+                    "quantity": 10,
+                    "limitPrice": 335.00
+                  }
+                },
+                "sellOrder": {
+                  "value": {
+                    "userId": "maria@example.com",
+                    "symbol": "TSLA",
+                    "side": "SELL",
+                    "quantity": 5,
+                    "limitPrice": 260.00
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Orden creada/procesada correctamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdenResponse"
+                },
+                "examples": {
+                  "buyExecuted": {
+                    "value": {
+                      "ordenId": "ab561276-ff77-4ef0-bf65-dd643f2b24ce",
+                      "estado": "FILLED",
+                      "cantidad": 10.0000,
+                      "cantidadRestante": 0.0000,
+                      "precioLimite": 335.0000,
+                      "mensaje": "Orden de compra ejecutada"
+                    }
+                  },
+                  "sellRegistered": {
+                    "value": {
+                      "ordenId": "97f2b8ae-9cfe-4ef1-b590-7f18b328f094",
+                      "estado": "PENDING",
+                      "cantidad": 0,
+                      "cantidadRestante": 5.0000,
+                      "precioLimite": 260.0000,
+                      "mensaje": "Orden de venta registrada"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos, saldo insuficiente o tenencias insuficientes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdersErrorResponse"
+                },
+                "examples": {
+                  "invalidSide": {
+                    "value": {
+                      "timestamp": "2026-06-23T18:45:30Z",
+                      "status": 400,
+                      "error": "El campo 'side' debe ser 'BUY' o 'SELL'."
+                    }
+                  },
+                  "insufficientBalance": {
+                    "value": {
+                      "timestamp": "2026-06-23T18:45:30Z",
+                      "status": 400,
+                      "error": "Saldo insuficiente. Requerido: 3350.00 ARS, Disponible: 1000.00 ARS"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Portafolio no encontrado. El código contiene esta intención de negocio aunque ciertos flujos pueden terminar devolviendo `500` por el manejo interno de excepciones.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdersErrorResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "value": {
+                      "timestamp": "2026-06-23T18:45:30Z",
+                      "status": 404,
+                      "error": "Portafolio no encontrado para el usuario"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor durante validaciones o matching.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdersErrorResponse"
+                },
+                "examples": {
+                  "internal": {
+                    "value": {
+                      "timestamp": "2026-06-23T18:45:30Z",
+                      "status": 500,
+                      "error": "Error al validar saldo del usuario"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Falla de integración con portfolio-service o market-data-service.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdersErrorResponse"
+                },
+                "examples": {
+                  "badGateway": {
+                    "value": {
+                      "timestamp": "2026-06-23T18:45:30Z",
+                      "status": 502,
+                      "error": "No se pudo consultar market-data-service"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/user/{userId}": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Listar órdenes por usuario",
+        "description": "Obtiene todas las órdenes del usuario ordenadas por fecha descendente.\n\nDiscrepancia detectada: el controlador real expone `/orders/user/{userId}`, pero el gateway está configurado con el patrón `/users/{userId}/orders/**`. Por eso esta operación se documenta sólo contra el microservicio directo.",
+        "operationId": "getOrdenes",
+        "servers": [
+          {
+            "url": "http://localhost:8083",
+            "description": "Microservicio directo"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "Identificador del usuario.",
+            "schema": {
+              "type": "string",
+              "example": "juan@example.com"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado de órdenes del usuario.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrdenResponse"
+                  }
+                },
+                "examples": {
+                  "ok": {
+                    "value": [
+                      {
+                        "ordenId": "ab561276-ff77-4ef0-bf65-dd643f2b24ce",
+                        "estado": "FILLED",
+                        "cantidad": 10.0000,
+                        "cantidadRestante": 0.0000,
+                        "precioLimite": 335.0000,
+                        "mensaje": "Consulta de órdenes"
+                      },
+                      {
+                        "ordenId": "97f2b8ae-9cfe-4ef1-b590-7f18b328f094",
+                        "estado": "PENDING",
+                        "cantidad": 0,
+                        "cantidadRestante": 5.0000,
+                        "precioLimite": 260.0000,
+                        "mensaje": "Consulta de órdenes"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/OrdersBadRequest"
+          },
+          "404": {
+            "description": "Usuario o ruta no encontrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdersErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/OrdersInternalError"
+          }
+        }
+      }
+    },
+    "/events": {
+      "post": {
+        "tags": [
+          "History"
+        ],
+        "summary": "Registrar evento de historial",
+        "description": "Registra un evento auditable en history-service y actualiza el modelo de lectura asociado.",
+        "operationId": "registraEvento",
+        "servers": [
+          {
+            "url": "http://localhost:8085",
+            "description": "Expuesto por API Gateway"
+          },
+          {
+            "url": "http://localhost:8084",
+            "description": "Microservicio directo"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HistorialEventoRequest"
+              },
+              "examples": {
+                "evento": {
+                  "value": {
+                    "eventId": "8c4e866c-9d87-4c6f-84c1-0d738c8a6e5e",
+                    "eventType": "BUY_ORDER_EXECUTED",
+                    "userId": "juan@example.com",
+                    "orderId": "ab561276-ff77-4ef0-bf65-dd643f2b24ce",
+                    "correlationId": "ab561276-ff77-4ef0-bf65-dd643f2b24ce",
+                    "causationId": null,
+                    "payloadJson": {
+                      "simbolo": "META",
+                      "lado": "BUY",
+                      "cantidad": 10.0000,
+                      "cantidadRestante": 0.0000,
+                      "precioLimite": 335.0000,
+                      "mensaje": "Orden de compra ejecutada"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Evento registrado correctamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistorialEventoResponse"
+                },
+                "examples": {
+                  "ok": {
+                    "value": {
+                      "eventId": "8c4e866c-9d87-4c6f-84c1-0d738c8a6e5e",
+                      "eventType": "BUY_ORDER_EXECUTED",
+                      "userId": "juan@example.com",
+                      "orderId": "ab561276-ff77-4ef0-bf65-dd643f2b24ce",
+                      "correlationId": "ab561276-ff77-4ef0-bf65-dd643f2b24ce",
+                      "causationId": null,
+                      "payloadJson": {
+                        "simbolo": "META",
+                        "lado": "BUY",
+                        "cantidad": 10.0000,
+                        "cantidadRestante": 0.0000,
+                        "precioLimite": 335.0000,
+                        "mensaje": "Orden de compra ejecutada"
+                      },
+                      "occurredAt": "2026-06-23T18:45:30"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/StandardBadRequest"
+          },
+          "404": {
+            "description": "Ruta no encontrada o recurso asociado inexistente. El controlador no devuelve 404 de negocio explícito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/StandardInternalError"
+          }
+        }
+      }
+    },
+    "/users/{userId}/history": {
+      "get": {
+        "tags": [
+          "History"
+        ],
+        "summary": "Consultar historial por usuario",
+        "description": "Devuelve los eventos históricos de un usuario ordenados desde el más reciente.",
+        "operationId": "getHistorialUsuario",
+        "servers": [
+          {
+            "url": "http://localhost:8085",
+            "description": "Expuesto por API Gateway"
+          },
+          {
+            "url": "http://localhost:8084",
+            "description": "Microservicio directo"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "Identificador del usuario.",
+            "schema": {
+              "type": "string",
+              "example": "juan@example.com"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado de eventos del usuario.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistorialEventoResponse"
+                  }
+                },
+                "examples": {
+                  "ok": {
+                    "value": [
+                      {
+                        "eventId": "8c4e866c-9d87-4c6f-84c1-0d738c8a6e5e",
+                        "eventType": "BUY_ORDER_EXECUTED",
+                        "userId": "juan@example.com",
+                        "orderId": "ab561276-ff77-4ef0-bf65-dd643f2b24ce",
+                        "correlationId": "ab561276-ff77-4ef0-bf65-dd643f2b24ce",
+                        "causationId": null,
+                        "payloadJson": {
+                          "simbolo": "META",
+                          "lado": "BUY",
+                          "cantidad": 10.0000
+                        },
+                        "occurredAt": "2026-06-23T18:45:30"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/StandardBadRequest"
+          },
+          "404": {
+            "description": "No hay 404 de negocio explícito; un usuario sin eventos devuelve lista vacía.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/StandardInternalError"
+          }
+        }
+      }
+    },
+    "/admin/history": {
+      "get": {
+        "tags": [
+          "History"
+        ],
+        "summary": "Consultar historial global del sistema",
+        "description": "Devuelve todo el historial del sistema ordenado desde el evento más reciente.\n\nSeguridad real detectada: el gateway restringe `/admin/**` a rol `ADMIN`, pero el microservicio directo en `8084` no tiene seguridad propia. Para pruebas funcionales se recomienda consumirlo vía gateway con JWT de administrador.",
+        "operationId": "getHistorialCompleto",
+        "servers": [
+          {
+            "url": "http://localhost:8085",
+            "description": "Expuesto por API Gateway (requiere ROLE_ADMIN)"
+          },
+          {
+            "url": "http://localhost:8084",
+            "description": "Microservicio directo (sin seguridad propia en el código actual)"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado completo de eventos del sistema.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistorialEventoResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/StandardBadRequest"
+          },
+          "401": {
+            "description": "No autenticado al consumir vía gateway.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Autenticado pero sin rol `ADMIN` al consumir vía gateway.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ruta no encontrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/StandardInternalError"
+          }
+        }
+      }
+    },
+    "/api/login/oauth2/code/keycloak": {
+      "get": {
+        "tags": [
+          "Gateway Auth"
+        ],
+        "summary": "Intercambiar authorization code por token",
+        "description": "Recibe un `code` de Keycloak y lo intercambia por un payload de token usando el endpoint OpenID Connect del issuer configurado.",
+        "operationId": "intercambiarCode",
+        "servers": [
+          {
+            "url": "http://localhost:8085",
+            "description": "API Gateway"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "description": "Authorization code emitido por Keycloak.",
+            "schema": {
+              "type": "string",
+              "example": "7e6df87d-authorization-code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Code intercambiado correctamente. La implementación actual devuelve el payload de Keycloak como `String`.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "ok": {
+                    "value": "{\"access_token\":\"eyJhbGciOi...\",\"expires_in\":300,\"refresh_token\":\"eyJhbGciOi...\",\"token_type\":\"Bearer\"}"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/StandardBadRequest"
+          },
+          "404": {
+            "description": "Ruta o recurso no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/StandardInternalError"
+          },
+          "502": {
+            "description": "No se pudo intercambiar el code por token contra Keycloak.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "No se pudo intercambiar el code por token"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/login/oauth2/me": {
+      "get": {
+        "tags": [
+          "Gateway Auth"
+        ],
+        "summary": "Inspeccionar identidad autenticada",
+        "description": "Devuelve información del JWT autenticado y de las authorities resueltas por Spring Security.\n\nObservación: el endpoint depende de que exista un JWT válido en el contexto; aunque el gateway no exige autenticación global para esta ruta, funcionalmente debe invocarse con `Bearer` token.",
+        "operationId": "me",
+        "servers": [
+          {
+            "url": "http://localhost:8085",
+            "description": "API Gateway"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Información del usuario autenticado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                },
+                "examples": {
+                  "ok": {
+                    "value": {
+                      "authenticated": true,
+                      "username": "cliente01",
+                      "email": "cliente01@example.com",
+                      "subject": "5ec0a6f6-8fc4-4b1f-932a-3a357c8dbf8a",
+                      "roles": [
+                        "USER"
+                      ],
+                      "authorities": [
+                        "ROLE_USER"
+                      ],
+                      "issuer": "http://localhost:8180/realms/tpi",
+                      "tokenValid": true,
+                      "tokenType": "JWT",
+                      "issuedAt": "2026-06-23T18:45:30Z",
+                      "expiresAt": "2026-06-23T19:15:30Z",
+                      "canAccessAdmin": false,
+                      "canAccessUser": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/StandardBadRequest"
+          },
+          "401": {
+            "description": "JWT ausente o inválido al usarlo de manera autenticada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ruta no encontrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/StandardInternalError"
+          }
+        }
+      }
+    },
+    "/api/login/oauth2/debug-token": {
+      "get": {
+        "tags": [
+          "Gateway Auth"
+        ],
+        "summary": "Validar y depurar JWT manualmente",
+        "description": "Decodifica manualmente el token recibido por query string usando el `ReactiveJwtDecoder` configurado.",
+        "operationId": "debugToken",
+        "servers": [
+          {
+            "url": "http://localhost:8085",
+            "description": "API Gateway"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "description": "JWT a validar.",
+            "schema": {
+              "type": "string",
+              "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token válido y decodificado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DebugTokenSuccessResponse"
+                },
+                "examples": {
+                  "ok": {
+                    "value": {
+                      "valid": true,
+                      "username": "cliente01",
+                      "email": "cliente01@example.com",
+                      "subject": "5ec0a6f6-8fc4-4b1f-932a-3a357c8dbf8a",
+                      "roles": [
+                        "USER"
+                      ],
+                      "issuer": "http://localhost:8180/realms/tpi",
+                      "issuedAt": "2026-06-23T18:45:30Z",
+                      "expiresAt": "2026-06-23T19:15:30Z",
+                      "canAccessAdmin": false,
+                      "canAccessUser": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/StandardBadRequest"
+          },
+          "401": {
+            "description": "Token inválido o no verificable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DebugTokenErrorResponse"
+                },
+                "examples": {
+                  "invalid": {
+                    "value": {
+                      "valid": false,
+                      "error": "Jwt expired at 2026-06-23T19:15:30Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ruta no encontrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/StandardInternalError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT emitido por Keycloak. En este proyecto se valida contra el issuer `http://localhost:8180/realms/tpi`."
+      }
+    },
+    "responses": {
+      "StandardBadRequest": {
+        "description": "Solicitud inválida.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StandardErrorResponse"
+            },
+            "examples": {
+              "badRequest": {
+                "value": {
+                  "code": 400,
+                  "message": "Error en la solicitud",
+                  "timestamp": "2026-06-23T18:45:30Z"
+                }
+              }
+            }
+          }
+        }
+      },
+      "StandardInternalError": {
+        "description": "Error interno del servidor.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StandardErrorResponse"
+            },
+            "examples": {
+              "internal": {
+                "value": {
+                  "code": 500,
+                  "message": "Error interno del servidor",
+                  "timestamp": "2026-06-23T18:45:30Z"
+                }
+              }
+            }
+          }
+        }
+      },
+      "OrdersBadRequest": {
+        "description": "Solicitud inválida en orders-service.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/OrdersErrorResponse"
+            }
+          }
+        }
+      },
+      "OrdersInternalError": {
+        "description": "Error interno en orders-service.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/OrdersErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "CotizacionResponse": {
+        "type": "object",
+        "required": [
+          "simbolo",
+          "precio",
+          "compañia",
+          "moneda",
+          "marcaTiempo"
+        ],
+        "properties": {
+          "simbolo": {
+            "type": "string",
+            "example": "AAPL"
+          },
+          "precio": {
+            "type": "number",
+            "format": "double",
+            "example": 124000.0
+          },
+          "compañia": {
+            "type": "string",
+            "description": "Campo expuesto por el DTO actual. En la implementación observada recibe el valor `ARS`, aunque semánticamente parecería destinado al nombre de la compañía.",
+            "example": "ARS"
+          },
+          "moneda": {
+            "type": "string",
+            "description": "Campo expuesto por el DTO actual. En la implementación observada recibe el valor `YAHOO_FINANCE`, aunque semánticamente parecería destinado a la moneda.",
+            "example": "YAHOO_FINANCE"
+          },
+          "marcaTiempo": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-23T18:45:30Z"
+          }
+        }
+      },
+      "PortafolioResponse": {
+        "type": "object",
+        "required": [
+          "userId",
+          "balanceArs",
+          "positions"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string",
+            "example": "juan@example.com"
+          },
+          "balanceArs": {
+            "type": "number",
+            "format": "double",
+            "example": 50000.0
+          },
+          "positions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PosicionResponse"
+            }
+          }
+        }
+      },
+      "PosicionResponse": {
+        "type": "object",
+        "required": [
+          "symbol",
+          "quantity",
+          "avgPriceArs"
+        ],
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "example": "AAPL"
+          },
+          "quantity": {
+            "type": "number",
+            "format": "double",
+            "example": 100.0
+          },
+          "avgPriceArs": {
+            "type": "number",
+            "format": "double",
+            "example": 150.5
+          }
+        }
+      },
+      "DepositoRequest": {
+        "type": "object",
+        "required": [
+          "amountArs",
+          "referenceId"
+        ],
+        "properties": {
+          "amountArs": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0.01,
+            "example": 25000.0
+          },
+          "referenceId": {
+            "type": "string",
+            "example": "DEP-20260623-001"
+          }
+        }
+      },
+      "DepositoResponse": {
+        "type": "object",
+        "required": [
+          "movementId",
+          "balanceArs"
+        ],
+        "properties": {
+          "movementId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "f084b2ce-7ed4-4a1f-b52c-cae1bdfd9bc2"
+          },
+          "balanceArs": {
+            "type": "number",
+            "format": "double",
+            "example": 75000.0
+          }
+        }
+      },
+      "TradeAdjustmentRequest": {
+        "type": "object",
+        "required": [
+          "side",
+          "symbol",
+          "quantity",
+          "priceArs",
+          "referenceId"
+        ],
+        "properties": {
+          "side": {
+            "type": "string",
+            "description": "Valores usados por la lógica de negocio: `BUY` o `SELL`.",
+            "example": "BUY"
+          },
+          "symbol": {
+            "type": "string",
+            "example": "META"
+          },
+          "quantity": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0.0001,
+            "example": 10.0
+          },
+          "priceArs": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0.01,
+            "example": 335.0
+          },
+          "referenceId": {
+            "type": "string",
+            "example": "ORDER-7b24d38d"
+          }
+        }
+      },
+      "OrdenRequest": {
+        "type": "object",
+        "required": [
+          "userId",
+          "symbol",
+          "side",
+          "quantity",
+          "limitPrice"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string",
+            "example": "juan@example.com"
+          },
+          "symbol": {
+            "type": "string",
+            "example": "META"
+          },
+          "side": {
+            "type": "string",
+            "pattern": "BUY|SELL",
+            "example": "BUY"
+          },
+          "quantity": {
+            "type": "number",
+            "format": "double",
+            "exclusiveMinimum": 0,
+            "example": 10
+          },
+          "limitPrice": {
+            "type": "number",
+            "format": "double",
+            "exclusiveMinimum": 0,
+            "example": 335.0
+          }
+        }
+      },
+      "OrdenResponse": {
+        "type": "object",
+        "required": [
+          "ordenId",
+          "estado",
+          "cantidad",
+          "cantidadRestante",
+          "precioLimite",
+          "mensaje"
+        ],
+        "properties": {
+          "ordenId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "ab561276-ff77-4ef0-bf65-dd643f2b24ce"
+          },
+          "estado": {
+            "type": "string",
+            "example": "FILLED"
+          },
+          "cantidad": {
+            "type": "number",
+            "format": "double",
+            "description": "Cantidad ejecutada o coincidente informada por el servicio.",
+            "example": 10.0
+          },
+          "cantidadRestante": {
+            "type": "number",
+            "format": "double",
+            "example": 0.0
+          },
+          "precioLimite": {
+            "type": "number",
+            "format": "double",
+            "example": 335.0
+          },
+          "mensaje": {
+            "type": "string",
+            "example": "Orden de compra ejecutada"
+          }
+        }
+      },
+      "HistorialEventoRequest": {
+        "type": "object",
+        "required": [
+          "eventType",
+          "payloadJson"
+        ],
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": "8c4e866c-9d87-4c6f-84c1-0d738c8a6e5e"
+          },
+          "eventType": {
+            "type": "string",
+            "example": "BUY_ORDER_EXECUTED"
+          },
+          "userId": {
+            "type": "string",
+            "nullable": true,
+            "example": "juan@example.com"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": "ab561276-ff77-4ef0-bf65-dd643f2b24ce"
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": "ab561276-ff77-4ef0-bf65-dd643f2b24ce"
+          },
+          "causationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": null
+          },
+          "payloadJson": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "simbolo": "META",
+              "lado": "BUY",
+              "cantidad": 10.0
+            }
+          }
+        }
+      },
+      "HistorialEventoResponse": {
+        "type": "object",
+        "required": [
+          "eventId",
+          "eventType",
+          "userId",
+          "orderId",
+          "correlationId",
+          "causationId",
+          "payloadJson",
+          "occurredAt"
+        ],
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "8c4e866c-9d87-4c6f-84c1-0d738c8a6e5e"
+          },
+          "eventType": {
+            "type": "string",
+            "example": "BUY_ORDER_EXECUTED"
+          },
+          "userId": {
+            "type": "string",
+            "nullable": true,
+            "example": "juan@example.com"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": "ab561276-ff77-4ef0-bf65-dd643f2b24ce"
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": "ab561276-ff77-4ef0-bf65-dd643f2b24ce"
+          },
+          "causationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": null
+          },
+          "payloadJson": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "simbolo": "META",
+              "lado": "BUY",
+              "cantidad": 10.0
+            }
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-23T18:45:30"
+          }
+        }
+      },
+      "MeResponse": {
+        "type": "object",
+        "properties": {
+          "authenticated": {
+            "type": "boolean",
+            "example": true
+          },
+          "username": {
+            "type": "string",
+            "example": "cliente01"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "cliente01@example.com"
+          },
+          "subject": {
+            "type": "string",
+            "example": "5ec0a6f6-8fc4-4b1f-932a-3a357c8dbf8a"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "authorities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "issuer": {
+            "type": "string",
+            "example": "http://localhost:8180/realms/tpi"
+          },
+          "tokenValid": {
+            "type": "boolean",
+            "example": true
+          },
+          "tokenType": {
+            "type": "string",
+            "example": "JWT"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2026-06-23T18:45:30Z"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2026-06-23T19:15:30Z"
+          },
+          "canAccessAdmin": {
+            "type": "boolean",
+            "example": false
+          },
+          "canAccessUser": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "DebugTokenSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "example": true
+          },
+          "username": {
+            "type": "string",
+            "example": "cliente01"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "cliente01@example.com"
+          },
+          "subject": {
+            "type": "string",
+            "example": "5ec0a6f6-8fc4-4b1f-932a-3a357c8dbf8a"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "issuer": {
+            "type": "string",
+            "nullable": true,
+            "example": "http://localhost:8180/realms/tpi"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2026-06-23T18:45:30Z"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2026-06-23T19:15:30Z"
+          },
+          "canAccessAdmin": {
+            "type": "boolean",
+            "example": false
+          },
+          "canAccessUser": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "DebugTokenErrorResponse": {
+        "type": "object",
+        "required": [
+          "valid",
+          "error"
+        ],
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "example": "Jwt expired at 2026-06-23T19:15:30Z"
+          }
+        }
+      },
+      "StandardErrorResponse": {
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "timestamp"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "example": 400
+          },
+          "message": {
+            "type": "string",
+            "example": "Error en la solicitud"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-23T18:45:30Z"
+          }
+        }
+      },
+      "OrdersErrorResponse": {
+        "type": "object",
+        "required": [
+          "timestamp",
+          "status",
+          "error"
+        ],
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-23T18:45:30Z"
+          },
+          "status": {
+            "type": "integer",
+            "example": 400
+          },
+          "error": {
+            "type": "string",
+            "example": "Saldo insuficiente. Requerido: 3350.00 ARS, Disponible: 1000.00 ARS"
+          }
+        }
+      }
+    }
+  }
+}
+
