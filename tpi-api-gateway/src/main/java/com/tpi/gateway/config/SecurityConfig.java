@@ -1,17 +1,14 @@
 package com.tpi.gateway.config;
 
+import com.tpi.gateway.security.JwtRoleExtractor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtGrantedAuthoritiesConverterAdapter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-
-import java.util.List;
+import reactor.core.publisher.Flux;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -27,22 +24,15 @@ public class SecurityConfig {
                     .pathMatchers(HttpMethod.GET, "/api/login/oauth2/debug-token").permitAll()
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/admin/**").hasRole("ADMIN")
-                        .anyExchange().permitAll())
+                        .anyExchange().hasRole("USER"))
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .build();
     }
 
     @Bean
     public ReactiveJwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        grantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
-        grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
-
-        JwtAuthenticationConverter delegate = new JwtAuthenticationConverter();
-        delegate.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
-
         ReactiveJwtAuthenticationConverter converter = new ReactiveJwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(new ReactiveJwtGrantedAuthoritiesConverterAdapter(grantedAuthoritiesConverter));
+        converter.setJwtGrantedAuthoritiesConverter(jwt -> Flux.fromIterable(JwtRoleExtractor.extractAuthorities(jwt)));
         converter.setPrincipalClaimName("preferred_username");
         return converter;
     }

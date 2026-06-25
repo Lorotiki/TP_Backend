@@ -146,7 +146,8 @@ services:
       - "8085:8085"
     environment:
       SERVER_PORT: 8085
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER-URI: http://keycloak:8080/realms/tpi
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8180/realms/tpi
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/tpi/protocol/openid-connect/certs
       SERVICES_URI_MARKET-DATA: http://market-data-service:8081
       SERVICES_URI_PORTFOLIO: http://portfolio-service:8082
       SERVICES_URI_ORDERS: http://orders-service:8083

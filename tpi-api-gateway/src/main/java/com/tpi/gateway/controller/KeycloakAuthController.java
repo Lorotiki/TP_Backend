@@ -1,5 +1,6 @@
 package com.tpi.gateway.controller;
 
+import com.tpi.gateway.security.JwtRoleExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,7 +78,7 @@ public class KeycloakAuthController {
 
     @GetMapping("/me")
     public Mono<Map<String, Object>> me(@AuthenticationPrincipal Jwt jwt, Authentication authentication) {
-        List<String> roles = jwt.getClaimAsStringList("roles");
+        List<String> roles = new ArrayList<>(JwtRoleExtractor.extractRoles(jwt));
         Set<String> authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
@@ -86,7 +88,7 @@ public class KeycloakAuthController {
         response.put("username", jwt.getClaimAsString("preferred_username"));
         response.put("email", jwt.getClaimAsString("email"));
         response.put("subject", jwt.getSubject());
-        response.put("roles", roles != null ? roles : List.of());
+        response.put("roles", roles);
         response.put("authorities", authorities);
         response.put("issuer", jwt.getIssuer() != null ? jwt.getIssuer().toString() : null);
         response.put("tokenValid", true);
@@ -103,19 +105,19 @@ public class KeycloakAuthController {
     public Mono<ResponseEntity<Map<String, Object>>> debugToken(@RequestParam String token) {
         return jwtDecoder.decode(token)
                 .map(jwt -> {
-            List<String> roles = jwt.getClaimAsStringList("roles");
+            List<String> roles = new ArrayList<>(JwtRoleExtractor.extractRoles(jwt));
 
             Map<String, Object> response = new LinkedHashMap<>();
             response.put("valid", true);
             response.put("username", jwt.getClaimAsString("preferred_username"));
             response.put("email", jwt.getClaimAsString("email"));
             response.put("subject", jwt.getSubject());
-            response.put("roles", roles != null ? roles : List.of());
+            response.put("roles", roles);
             response.put("issuer", jwt.getIssuer() != null ? jwt.getIssuer().toString() : null);
             response.put("issuedAt", jwt.getIssuedAt() != null ? jwt.getIssuedAt().toString() : null);
             response.put("expiresAt", jwt.getExpiresAt() != null ? jwt.getExpiresAt().toString() : null);
-            response.put("canAccessAdmin", roles != null && roles.contains("ADMIN"));
-            response.put("canAccessUser", roles != null && (roles.contains("USER") || roles.contains("ADMIN")));
+            response.put("canAccessAdmin", roles.contains("ADMIN"));
+            response.put("canAccessUser", roles.contains("USER") || roles.contains("ADMIN"));
 
             return ResponseEntity.ok(response);
         })

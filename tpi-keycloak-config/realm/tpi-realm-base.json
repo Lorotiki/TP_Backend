@@ -132,6 +132,24 @@
 			"webOrigins": [
 				"http://localhost",
 				"http://127.0.0.1"
+			],
+			"protocolMappers": [
+				{
+					"name": "realm roles",
+					"protocol": "openid-connect",
+					"protocolMapper": "oidc-usermodel-realm-role-mapper",
+					"consentRequired": false,
+					"config": {
+						"user.attribute": "",
+						"claim.name": "roles",
+						"jsonType.label": "String",
+						"multivalued": "true",
+						"id.token.claim": "true",
+						"access.token.claim": "true",
+						"userinfo.token.claim": "true",
+						"lightweight.claim": "false"
+					}
+				}
 			]
 		}
 	],

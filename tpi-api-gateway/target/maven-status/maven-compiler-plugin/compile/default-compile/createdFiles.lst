@@ -1,4 +1,5 @@
 com/tpi/gateway/exception/GlobalExceptionHandler.class
+com/tpi/gateway/security/JwtRoleExtractor.class
 com/tpi/gateway/controller/KeycloakAuthController.class
 com/tpi/gateway/ApiGatewayApplication.class
 com/tpi/gateway/config/RouteLocatorConfig.class
