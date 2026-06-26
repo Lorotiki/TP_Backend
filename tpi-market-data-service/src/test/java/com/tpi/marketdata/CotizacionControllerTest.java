@@ -16,7 +16,7 @@ class CotizacionControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-/*  Los valores de esta accion ahora dependen del mercado
+
     @Test
     void shouldReturnQuoteForKnownSymbol() throws Exception {
         mockMvc.perform(get("/quotes/nvda"))
@@ -25,13 +25,13 @@ class CotizacionControllerTest {
                 .andExpect(jsonPath("$.currency").value("ARS"))
                 .andExpect(jsonPath("$.price").value(36000.00));
     }
-revisar test
+
     @Test
     void shouldReturnNotFoundForUnknownSymbol() throws Exception {
         mockMvc.perform(get("/quotes/unknown"))
                 .andExpect(status().isNotFound());
     }
 
- */
+
 }
 
