@@ -1,6 +1,6 @@
-/home/leandro/Documentos/UTN/Backend/TP/tpi-api-gateway/src/main/java/com/tpi/gateway/ApiGatewayApplication.java
-/home/leandro/Documentos/UTN/Backend/TP/tpi-api-gateway/src/main/java/com/tpi/gateway/config/RouteLocatorConfig.java
-/home/leandro/Documentos/UTN/Backend/TP/tpi-api-gateway/src/main/java/com/tpi/gateway/config/SecurityConfig.java
-/home/leandro/Documentos/UTN/Backend/TP/tpi-api-gateway/src/main/java/com/tpi/gateway/controller/KeycloakAuthController.java
-/home/leandro/Documentos/UTN/Backend/TP/tpi-api-gateway/src/main/java/com/tpi/gateway/exception/GlobalExceptionHandler.java
-/home/leandro/Documentos/UTN/Backend/TP/tpi-api-gateway/src/main/java/com/tpi/gateway/security/JwtRoleExtractor.java
+C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-api-gateway\src\main\java\com\tpi\gateway\ApiGatewayApplication.java
+C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-api-gateway\src\main\java\com\tpi\gateway\config\RouteLocatorConfig.java
+C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-api-gateway\src\main\java\com\tpi\gateway\config\SecurityConfig.java
+C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-api-gateway\src\main\java\com\tpi\gateway\controller\KeycloakAuthController.java
+C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-api-gateway\src\main\java\com\tpi\gateway\exception\GlobalExceptionHandler.java
+C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-api-gateway\src\main\java\com\tpi\gateway\security\JwtRoleExtractor.java
