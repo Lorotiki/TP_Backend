@@ -1,6 +1,8 @@
+C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-portfolio-service\src\main\java\com\tpi\portfolio\config\RestClientsConfig.java
 C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-portfolio-service\src\main\java\com\tpi\portfolio\controller\PortafolioController.java
 C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-portfolio-service\src\main\java\com\tpi\portfolio\dto\DepositoRequest.java
 C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-portfolio-service\src\main\java\com\tpi\portfolio\dto\DepositoResponse.java
+C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-portfolio-service\src\main\java\com\tpi\portfolio\dto\HistorialEventoClienteRequest.java
 C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-portfolio-service\src\main\java\com\tpi\portfolio\dto\PortafolioResponse.java
 C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-portfolio-service\src\main\java\com\tpi\portfolio\dto\PosicionResponse.java
 C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-portfolio-service\src\main\java\com\tpi\portfolio\dto\TradeAdjustmentRequest.java

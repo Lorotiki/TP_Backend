@@ -81,9 +81,11 @@ services:
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
       KEYCLOAK_URL: http://keycloak:8080
+      HISTORY_BASE_URL: http://history-service:8084
     depends_on:
       - postgres
       - keycloak
+      - history-service
     networks:
       - tpi-network
     restart: on-failure

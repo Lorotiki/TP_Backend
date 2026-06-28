@@ -33,6 +33,11 @@ public class PortafolioController {
         return portafolioService.deposito(userId, request);
     }
 
+    @PostMapping("/portfolio/balance")
+    public DepositoResponse cargarSaldo(@PathVariable String userId, @Valid @RequestBody DepositoRequest request) {
+        return portafolioService.deposito(userId, request);
+    }
+
     @PostMapping("/trades")
     public PortafolioResponse applyTrade(@PathVariable String userId, @Valid @RequestBody TradeAdjustmentRequest request) {
         return portafolioService.aplicarTrade(userId, request);

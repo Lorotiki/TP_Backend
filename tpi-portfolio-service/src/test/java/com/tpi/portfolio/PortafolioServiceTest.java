@@ -61,5 +61,19 @@ class PortafolioServiceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.balanceArs").value(1000.50));
     }
+
+    @Test
+    void shouldLoadBalanceFromPortfolioEndpoint() throws Exception {
+        mockMvc.perform(post("/users/user-test/portfolio/balance")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  \"amountArs\": 2500.00,
+                                  \"referenceId\": \"balance-1\"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.balanceArs").value(2500.00));
+    }
 }
 

@@ -1,0 +1,27 @@
+-------------------------------------------------------------------------------
+Test set: com.tpi.marketdata.CotizacionControllerTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 5.013 s <<< FAILURE! -- in com.tpi.marketdata.CotizacionControllerTest
+com.tpi.marketdata.CotizacionControllerTest.shouldReturnNotFoundForUnknownSymbol -- Time elapsed: 2.176 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<404> but was:<503>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:59)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:122)
+	at org.springframework.test.web.servlet.result.StatusResultMatchers.lambda$matcher$9(StatusResultMatchers.java:637)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+	at com.tpi.marketdata.CotizacionControllerTest.shouldReturnNotFoundForUnknownSymbol(CotizacionControllerTest.java:32)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+com.tpi.marketdata.CotizacionControllerTest.shouldReturnQuoteForKnownSymbol -- Time elapsed: 0.497 s <<< FAILURE!
+java.lang.AssertionError: No value at JSON path "$.symbol"
+	at org.springframework.test.util.JsonPathExpectationsHelper.evaluateJsonPath(JsonPathExpectationsHelper.java:302)
+	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:99)
+	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:111)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+	at com.tpi.marketdata.CotizacionControllerTest.shouldReturnQuoteForKnownSymbol(CotizacionControllerTest.java:24)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: com.jayway.jsonpath.PathNotFoundException: No results for path: $['symbol']
+

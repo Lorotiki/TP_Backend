@@ -2,6 +2,7 @@ package com.tpi.portfolio.service;
 
 import com.tpi.portfolio.dto.DepositoRequest;
 import com.tpi.portfolio.dto.DepositoResponse;
+import com.tpi.portfolio.dto.HistorialEventoClienteRequest;
 import com.tpi.portfolio.dto.PortafolioResponse;
 import com.tpi.portfolio.dto.PosicionResponse;
 import com.tpi.portfolio.dto.TradeAdjustmentRequest;
@@ -13,13 +14,18 @@ import com.tpi.portfolio.repository.MovimientoDineroRepository;
 import com.tpi.portfolio.repository.PosicionRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,11 +35,19 @@ public class PortafolioService {
     private final CuentaRepository cuentaRepository;
     private final PosicionRepository posicionRepository;
     private final MovimientoDineroRepository movimientoDineroRepository;
+    private final RestTemplate restTemplate;
+    private final String historialUrl;
 
-    public PortafolioService(CuentaRepository cuentaRepository, PosicionRepository posicionRepository, MovimientoDineroRepository movimientoDineroRepository) {
+    public PortafolioService(CuentaRepository cuentaRepository,
+                             PosicionRepository posicionRepository,
+                             MovimientoDineroRepository movimientoDineroRepository,
+                             RestTemplate restTemplate,
+                             @Value("${clients.history.base-url}") String historialUrl) {
         this.cuentaRepository = cuentaRepository;
         this.posicionRepository = posicionRepository;
         this.movimientoDineroRepository = movimientoDineroRepository;
+        this.restTemplate = restTemplate;
+        this.historialUrl = historialUrl;
     }
 
     @Transactional
@@ -69,6 +83,8 @@ public class PortafolioService {
         movement.setAmountArs(request.amountArs());
         movement.setReferenceId(request.referenceId());
         movement = movimientoDineroRepository.save(movement);
+
+        registrarDepositoEnHistorial(userId, request, movement.getId().toString(), cuenta.getBalanceArs());
 
         log.info("Depósito completado para usuario: {}. Nuevo saldo: {}", userId, cuenta.getBalanceArs());
         return new DepositoResponse(movement.getId(), cuenta.getBalanceArs());
@@ -151,5 +167,32 @@ public class PortafolioService {
                     nuevaCuenta.setBalanceArs(BigDecimal.ZERO);
                     return cuentaRepository.save(nuevaCuenta);
                 });
+    }
+
+    private void registrarDepositoEnHistorial(String userId, DepositoRequest request, String movementId, BigDecimal nuevoSaldo) {
+        try {
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("amountArs", request.amountArs());
+            payload.put("referenceId", request.referenceId());
+            payload.put("movementId", movementId);
+            payload.put("balanceArs", nuevoSaldo);
+            payload.put("mensaje", "Depósito acreditado");
+
+            var eventId = UUID.randomUUID();
+            var historialRequest = new HistorialEventoClienteRequest(
+                    eventId,
+                    "DEPOSIT_RECEIVED",
+                    userId,
+                    null,
+                    eventId,
+                    null,
+                    payload
+            );
+
+            restTemplate.postForObject(historialUrl + "/events", historialRequest, Void.class);
+            log.debug("Evento de depósito registrado en historial: usuario={}, movementId={}", userId, movementId);
+        } catch (Exception e) {
+            log.warn("Error registrando depósito en historial: {}", e.getMessage());
+        }
     }
 }

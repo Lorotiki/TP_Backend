@@ -14,3 +14,7 @@ spring:
           create_namespaces: true
     open-in-view: false
 
+clients:
+  history:
+    base-url: http://localhost:18084
+
