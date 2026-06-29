@@ -42,12 +42,6 @@ public class HistorialEvento {
     @Column(name = "causation_id")
     private UUID causationId;
 
-/*
-@JdbcTypeCode(SqlTypes.JSON), le estás diciendo a Hibernate:
-"Che, cuando guardes este Map, convertilo automáticamente a una cadena de texto JSON (un String formateado) y metelo en la columna payload_json de la base de datos.
-Y cuando lo leas, volvé a transformarlo en un objeto Map".
- */
-
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "payload_json", nullable = false)
     private Map<String, Object> payloadJson;
@@ -55,10 +49,6 @@ Y cuando lo leas, volvé a transformarlo en un objeto Map".
     @Column(name = "occurred_at", nullable = false)
     private LocalDateTime occurredAt;
 
-    /*
-    Sirve para marcar un método que se tiene que ejecutar automáticamente justo antes de que el objeto se inserte por primera vez en la base de datos
-    (cuando se hace un save o persist).
-     */
     @PrePersist
     void onCreate() {
         if (eventId == null) {

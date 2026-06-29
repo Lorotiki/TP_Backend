@@ -3,4 +3,5 @@ C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-api-gateway\sr
 C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-api-gateway\src\main\java\com\tpi\gateway\config\SecurityConfig.java
 C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-api-gateway\src\main\java\com\tpi\gateway\controller\KeycloakAuthController.java
 C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-api-gateway\src\main\java\com\tpi\gateway\exception\GlobalExceptionHandler.java
+C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-api-gateway\src\main\java\com\tpi\gateway\security\AuthenticatedUserGatewayFilter.java
 C:\Users\juanc\OneDrive\Escritorio\TP-BACKEND-2026\TP_Backend\tpi-api-gateway\src\main\java\com\tpi\gateway\security\JwtRoleExtractor.java

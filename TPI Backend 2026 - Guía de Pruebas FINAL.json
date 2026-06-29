@@ -182,6 +182,45 @@
 					"response": []
 				},
 				{
+					"name": "2.3 Cargar Saldo al Portfolio (juan@example.com)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amountArs\": 250000.00,\n  \"referenceId\": \"carga-saldo-demo-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/users/juan@example.com/portfolio/balance",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"users",
+								"juan@example.com",
+								"portfolio",
+								"balance"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "2.4 Registrar Orden de Compra (Matching Exitoso)",
 					"request": {
 						"auth": {
