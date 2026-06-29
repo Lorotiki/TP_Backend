@@ -28,15 +28,14 @@ public class CotizacionMercadoService {
     }
 
     public CotizacionResponse getCotizacion(String simbolo) {
-        var simboloObligatorio = normalizarSimbolo(simbolo);
+        String simboloObligatorio = normalizarSimbolo(simbolo);
         log.debug("Obteniendo cotización para símbolo: {}", simboloObligatorio);
         
         try {
             return getCotizacionDesdeYahooFinance(simboloObligatorio);
         } catch (Exception e) {
             log.error("Error al obtener cotización de Yahoo Finance para {}: {}", simboloObligatorio, e.getMessage());
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, 
-                "No se pudo obtener la cotización para " + simboloObligatorio);
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "No se pudo obtener la cotización para " + simboloObligatorio);
         }
     }
 
@@ -72,7 +71,6 @@ public class CotizacionMercadoService {
         
         BigDecimal precioARS = convertirMonedaAPesosArg(new BigDecimal(precioUSD), moneda);
         
-     //   return new CotizacionResponse(simbolo, precioARS, "ARS", "YAHOO_FINANCE", OffsetDateTime.now());
         return new CotizacionResponse(simbolo, precioARS, nombre, "ARS",OffsetDateTime.now());
     }
 
@@ -82,8 +80,6 @@ public class CotizacionMercadoService {
             return precio;
         }
 
-        //to-do armar para levantar la cotizacion oficial???
-        // aca se modificar la cotizacion del dolar
         if ("USD".equalsIgnoreCase(moneda)) {
             BigDecimal tasa = new BigDecimal("800.00");
             BigDecimal resultado = precio.multiply(tasa);
@@ -92,6 +88,7 @@ public class CotizacionMercadoService {
         }
         
         log.warn("Moneda desconocida: {}, asumiendo USD", moneda);
+
         return precio.multiply(new BigDecimal("800.00"));
     }
 
