@@ -28,11 +28,6 @@ public class PortafolioController {
         return portafolioService.getPortafolio(userId);
     }
 
-    @PostMapping("/deposits")
-    public DepositoResponse deposito(@PathVariable String userId, @Valid @RequestBody DepositoRequest request) {
-        return portafolioService.deposito(userId, request);
-    }
-
     @PostMapping("/portfolio/balance")
     public DepositoResponse cargarSaldo(@PathVariable String userId, @Valid @RequestBody DepositoRequest request) {
         return portafolioService.deposito(userId, request);

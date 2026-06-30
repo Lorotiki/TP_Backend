@@ -26,13 +26,5 @@ public interface OrdenRepository extends JpaRepository<OrdenEntity, UUID> {
             """)
     List<OrdenEntity> findByUsuarioIdOrdenByCreatedAtDesc(@Param("userId") String usuarioId);
 
-    @Query("""
-            select o from OrdenEntity o
-            where o.userId = :userId
-              and o.simbolo = :symbol
-              and o.lado = 'SELL'
-              and o.estado in ('PENDING', 'PARTIALLY_FILLED')
-            """)
-    List<OrdenEntity> findOrdenesVentaAbiertas(@Param("userId") String usuarioId, @Param("symbol") String simbolo);
 }
 

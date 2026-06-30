@@ -49,38 +49,34 @@ public class OrdenService {
 
     @Transactional
     public OrdenResponse createOrden(OrdenRequest request) {
-        log.info("▶ Procesando orden: lado={}, usuario={}, simbolo={}, cantidad={}, precioLimite={}",
-                request.side(), request.userId(), request.symbol(), request.quantity(), request.limitPrice());
+        log.info(" Procesando orden: lado={}, usuario={}, simbolo={}, cantidad={}, precioLimite={}", request.side(), request.userId(), request.symbol(), request.quantity(), request.limitPrice());
 
         if ("BUY".equalsIgnoreCase(request.side())) {
             return procesarCompra(request);
         } else if ("SELL".equalsIgnoreCase(request.side())) {
             return procesarVenta(request);
         } else {
-            // Esta validación es una salvaguarda; @Pattern en el DTO debería atrapar esto primero.
             throw new IllegalArgumentException("El campo 'side' debe ser 'BUY' o 'SELL'.");
         }
     }
 
     private OrdenResponse procesarVenta(OrdenRequest request) {
         try {
-            var orden = createOrdenEntity(request);
+            
+            OrdenEntity orden = createOrdenEntity(request);
+
             validaDisponibilidadAcciones(orden);
+
             orden.setEstado("PENDING");
+
             ordenRepository.save(orden);
 
-            log.info("✅ Orden de venta registrada: nroOrden={}, estado={}",
-                    orden.getId(), orden.getEstado());
+            log.info("Orden de venta registrada: nroOrden={}, estado={}", orden.getId(), orden.getEstado());
 
-            recordHistorial("SELL_ORDER_CREATED",
-                    orden,
-                    orden.getCantidad(),
-                    orden.getCantidadRestante(),
-                    orden.getPrecioLimite(),
-                    "Orden de venta registrada");
+            recordHistorial("SELL_ORDER_CREATED", orden, orden.getCantidad(), orden.getCantidadRestante(), orden.getPrecioLimite(), "Orden de venta registrada");
 
-            return toResponse(orden, BigDecimal.ZERO, orden.getCantidadRestante(),
-                    orden.getPrecioLimite(), "Orden de venta registrada");
+            return toResponse(orden, BigDecimal.ZERO, orden.getCantidadRestante(), orden.getPrecioLimite(), "Orden de venta registrada");
+        
         } catch (Exception e) {
             log.error("Error procesando orden de venta: usuarioID={}, simbolo={}",
                     request.userId(), request.symbol(), e);
@@ -90,29 +86,31 @@ public class OrdenService {
 
     private OrdenResponse procesarCompra(OrdenRequest request) {
         try {
-            var cotizacionMercado = obtenerCotizacion(request.symbol());
-            log.debug("Cotización obtenida: simbolo={}, precio={}, moneda={}",
-                    cotizacionMercado.simbolo(), cotizacionMercado.precio(), cotizacionMercado.moneda());
+            CotizacionClienteResponse cotizacionMercado = obtenerCotizacion(request.symbol());
+            log.debug("Cotización obtenida: simbolo={}, precio={}, moneda={}", cotizacionMercado.simbolo(), cotizacionMercado.precio(), cotizacionMercado.moneda());
 
-            var orden = createOrdenEntity(request);
+            OrdenEntity orden = createOrdenEntity(request);
             log.debug(" Orden creada: nroOrden={}", orden.getId());
 
             validaSaldoUsuario(orden, cotizacionMercado.precio());
-            log.debug(" Balance validado: saldoRequerido={} ARS",
-                    orden.getCantidad().multiply(orden.getPrecioLimite()));
+
+            log.debug(" Balance validado: saldoRequerido={} ARS", orden.getCantidad().multiply(orden.getPrecioLimite()));
 
             ordenRepository.save(orden);
+            
             log.debug(" Orden persistida en BD");
 
-            var vendedoresDisponibles = ordenRepository.findCoincidenciasVentas(orden.getSimbolo(), "SELL");
+            List<OrdenEntity> vendedoresDisponibles = ordenRepository.findCoincidenciasVentas(orden.getSimbolo(), "SELL");
+            
             log.debug("Encontradas {} órdenes de venta disponibles", vendedoresDisponibles.size());
 
-            var cantidades = BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP);
+            BigDecimal cantidades = BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP);
+            
             List<OrdenEntity> vendedoresActualizados = new ArrayList<>();
 
-            for (var vendedor : vendedoresDisponibles) {
+            for (OrdenEntity vendedor : vendedoresDisponibles) {
                 if (orden.getCantidadRestante().compareTo(BigDecimal.ZERO) == 0) {
-                    log.debug("Cantidad completa satisfecha, saliendo del loop");
+                    log.debug("La orden de compra ya fue completada");
                     break;
                 }
 
@@ -122,36 +120,34 @@ public class OrdenService {
                 }
 
                 if (vendedor.getPrecioLimite().compareTo(orden.getPrecioLimite()) > 0) {
-                    log.debug("Precio no coincide: vendedor.precio={} > comprador.precio={}",
-                            vendedor.getPrecioLimite(), orden.getPrecioLimite());
+                    log.debug("El precio del vendedor no es competitivo: vendedor.precio={} > comprador.precio={}", vendedor.getPrecioLimite(), orden.getPrecioLimite());
                     continue;
                 }
 
-                var cantidad = vendedor.getCantidadRestante().min(orden.getCantidadRestante())
-                        .setScale(4, RoundingMode.HALF_UP);
+                // aca tengo que ver cual de las dos cantidades es menor, la del comprador o la del vendedor
+                BigDecimal cantidad = vendedor.getCantidadRestante().min(orden.getCantidadRestante()).setScale(4, RoundingMode.HALF_UP);
 
                 if (cantidad.compareTo(BigDecimal.ZERO) <= 0) {
                     log.debug("Cantidad inválida: cantidad={}", cantidad);
                     continue;
                 }
 
-                log.info("MATCH encontrado: comprador={}, vendedor={}, cantidad={}, precio={}",
-                        orden.getUserId(), vendedor.getUserId(), cantidad, vendedor.getPrecioLimite());
+                log.info("MATCH encontrado: comprador={}, vendedor={}, cantidad={}, precio={}", orden.getUserId(), vendedor.getUserId(), cantidad, vendedor.getPrecioLimite());
 
-                var precioVenta = vendedor.getPrecioLimite().setScale(4, RoundingMode.HALF_UP);
+                BigDecimal precioVenta = vendedor.getPrecioLimite().setScale(4, RoundingMode.HALF_UP);
 
-                ejecutarCompraXPortafolio(orden.getUserId(), "BUY", orden.getSimbolo(), cantidad,
-                        precioVenta, orden.getId().toString());
-                ejecutarCompraXPortafolio(vendedor.getUserId(), "SELL", vendedor.getSimbolo(), cantidad,
-                        precioVenta, vendedor.getId().toString());
+                ejecutarCompraXPortafolio(orden.getUserId(), "BUY", orden.getSimbolo(), cantidad, precioVenta, orden.getId().toString());
+                ejecutarCompraXPortafolio(vendedor.getUserId(), "SELL", vendedor.getSimbolo(), cantidad, precioVenta, vendedor.getId().toString());
 
                 vendedor.setCantidadRestante(vendedor.getCantidadRestante().subtract(cantidad));
                 vendedor.setEstado(resolveStatus(vendedor.getCantidadRestante(), vendedor.getCantidad()));
+
                 orden.setCantidadRestante(orden.getCantidadRestante().subtract(cantidad));
                 orden.setEstado(resolveStatus(orden.getCantidadRestante(), orden.getCantidad()));
+                
                 vendedoresActualizados.add(vendedor);
 
-                var fill = new OrdenFill();
+                OrdenFill fill = new OrdenFill();
                 fill.setCompraOrdenId(orden.getId());
                 fill.setVentaOrdenId(vendedor.getId());
                 fill.setSimbolo(orden.getSimbolo());
@@ -159,40 +155,48 @@ public class OrdenService {
                 fill.setPrecioArs(precioVenta);
                 ordenFillRepository.save(fill);
 
-                recordHistorial("SELL_ORDER_EXECUTED", vendedor, cantidad, vendedor.getCantidadRestante(),
-                        precioVenta, "Orden de venta ejecutada");
+                recordHistorial("SELL_ORDER_EXECUTED", vendedor, cantidad, vendedor.getCantidadRestante(), precioVenta, "Orden de venta ejecutada");
 
                 cantidades = cantidades.add(cantidad);
             }
 
+            // si la cantidad es cero quiere decir que no se pudo hacer la transaccion digamos
             if (cantidades.compareTo(BigDecimal.ZERO) == 0) {
+
                 orden.setEstado("REJECTED");
+
                 ordenRepository.save(orden);
-                recordHistorial("BUY_ORDER_REJECTED", orden, BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP),
-                        orden.getCantidadRestante(), orden.getPrecioLimite(),
-                        "Orden de compra rechazada: no hay ofertas compatibles");
-                return toResponse(orden, BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP), orden.getCantidadRestante(),
+
+                recordHistorial("BUY_ORDER_REJECTED", orden, BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP), orden.getCantidadRestante(), orden.getPrecioLimite(), "Orden de compra rechazada: no hay ofertas compatibles");
+                
+                return toResponse(orden, BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP), 
+                        orden.getCantidadRestante(),
                         orden.getPrecioLimite(), "Orden de compra rechazada: no hay ofertas compatibles");
             }
 
+            // si la cantidad no es cero osea que es mayor, algo se hizo 
             vendedoresActualizados.add(orden);
+
             ordenRepository.saveAll(vendedoresActualizados);
+
             recordHistorial("BUY_ORDER_EXECUTED", orden, cantidades, orden.getCantidadRestante(),
                     orden.getPrecioLimite(), "Orden de compra ejecutada");
 
-            log.info("Orden completada: ordenID={}, cantidadCoincidida={}, cantidadRestante={}, estado={}",
-                    orden.getId(), cantidades, orden.getCantidadRestante(), orden.getEstado());
+            log.info("Orden completada: ordenID={}, cantidadCoincidida={}, cantidadRestante={}, estado={}", orden.getId(), cantidades, orden.getCantidadRestante(), orden.getEstado());
 
             return toResponse(orden, cantidades, orden.getCantidadRestante(),
                     orden.getPrecioLimite(), "Orden de compra ejecutada");
+
         } catch (Exception e) {
             log.error("Error procesando orden de compra: usuarioID={}, simbolo={}", request.userId(), request.symbol(), e);
             throw e;
         }
     }
 
+    // esta es de usuario
     public List<OrdenResponse> getOrdenesByUsuario(String userId) {
         log.debug("Consultando órdenes para usuario: {}", userId);
+
         return ordenRepository.findByUsuarioIdOrdenByCreatedAtDesc(userId).stream()
                 .map(orden -> toResponse(orden,
                         orden.getCantidad().subtract(orden.getCantidadRestante()),
@@ -205,25 +209,19 @@ public class OrdenService {
     private void ejecutarCompraXPortafolio(String usuarioId, String lado, String simbolo, BigDecimal cantidad, BigDecimal precioArs, String referenciaId) {
         var request = new PortafolioTradeClienteRequest(lado, simbolo, cantidad, precioArs, referenciaId);
         try {
-            restTemplate.postForEntity(portafolioUrl + "/users/" + usuarioId + "/trades", request,
-                    Void.class);
+            restTemplate.postForEntity(portafolioUrl + "/users/" + usuarioId + "/trades", request, Void.class);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "No se pudo actualizar portfolio-service", e);
         }
     }
 
-    /**
-     * Valida que el usuario tenga saldo suficiente para la compra
-     */
     private void validaSaldoUsuario(OrdenEntity orden, BigDecimal precioMercado) {
         log.debug("Validando balance para compra: usuarioId={}, cantidad={}, precioLimite={}",
                 orden.getUserId(), orden.getCantidad(), orden.getPrecioLimite());
 
         // Consultar portafolio del usuario
         try {
-            PortafolioClienteResponse portafolio = restTemplate.getForObject(
-                    portafolioUrl + "/users/" + orden.getUserId() + "/portfolio",
-                    PortafolioClienteResponse.class);
+            PortafolioClienteResponse portafolio = restTemplate.getForObject( portafolioUrl + "/users/" + orden.getUserId() + "/portfolio", PortafolioClienteResponse.class);
 
             if (portafolio == null) {
                 log.warn("Portafolio no encontrado para usuarioId: {}", orden.getUserId());
@@ -238,18 +236,14 @@ public class OrdenService {
                         "Respuesta invalida de portfolio-service: falta balanceArs");
             }
 
-            // Calcular monto requerido
             BigDecimal montoRequerido = orden.getCantidad()
                     .multiply(orden.getPrecioLimite())
                     .setScale(2, RoundingMode.HALF_UP);
 
-            log.debug("Balance requerido: {} ARS, Balance disponible: {} ARS",
-                    montoRequerido, portafolio.valorTotalArs());
+            log.debug("Balance requerido: {} ARS, Balance disponible: {} ARS", montoRequerido, portafolio.valorTotalArs());
 
-            // Validar saldo
             if (portafolio.valorTotalArs().compareTo(montoRequerido) < 0) {
-                log.warn("Saldo insuficiente: usuarioId={}, requerido={}, disponible={}",
-                        orden.getUserId(), montoRequerido, portafolio.valorTotalArs());
+                log.warn("Saldo insuficiente: usuarioId={}, requerido={}, disponible={}", orden.getUserId(), montoRequerido, portafolio.valorTotalArs());
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
                         String.format(
@@ -269,15 +263,6 @@ public class OrdenService {
         }
     }
 
-    private PortafolioClienteResponse consultarPortafolio(String usuarioId) {
-        try {
-            return restTemplate.getForObject(portafolioUrl + "/users/" + usuarioId + "/portfolio",
-                    PortafolioClienteResponse.class);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "No se pudo consultar portfolio-service", e);
-        }
-    }
-
     private CotizacionClienteResponse obtenerCotizacion(String simbolo) {
         try {
             return restTemplate.getForObject(mercadoUrl + "/quotes/" + simbolo, CotizacionClienteResponse.class);
@@ -287,7 +272,7 @@ public class OrdenService {
     }
 
     private OrdenEntity createOrdenEntity(OrdenRequest request) {
-        var orden = new OrdenEntity();
+        OrdenEntity orden = new OrdenEntity();
         orden.setUserId(request.userId());
         orden.setSimbolo(request.symbol().trim().toUpperCase(Locale.ROOT));
         orden.setLado(request.side());
@@ -316,17 +301,12 @@ public class OrdenService {
                 precioEjecArs, mensaje);
     }
 
-    /**
-     * Valida que el usuario tenga las acciones para vender
-     */
     private void validaDisponibilidadAcciones(OrdenEntity orden) {
-        log.debug("Validando disponibilidad de acciones para venta: usuarioId={}, simbolo={}, cantidad={}",
-                orden.getUserId(), orden.getSimbolo(), orden.getCantidad());
+        log.debug("Validando disponibilidad de acciones para venta: usuarioId={}, simbolo={}, cantidad={}", orden.getUserId(), orden.getSimbolo(), orden.getCantidad());
 
         try {
-            PortafolioClienteResponse portafolio = restTemplate.getForObject(
-                    portafolioUrl + "/users/" + orden.getUserId() + "/portfolio",
-                    PortafolioClienteResponse.class);
+
+            PortafolioClienteResponse portafolio = restTemplate.getForObject(portafolioUrl + "/users/" + orden.getUserId() + "/portfolio", PortafolioClienteResponse.class);
 
             if (portafolio == null) {
                 log.warn("Portafolio no encontrado para usuarioId: {}", orden.getUserId());
@@ -341,25 +321,21 @@ public class OrdenService {
                         "Respuesta invalida de portfolio-service: falta positions");
             }
 
-            // Buscar la posición del símbolo
+            
             var posicion = portafolio.posiciones().stream()
                     .filter(p -> p.simbolo().equalsIgnoreCase(orden.getSimbolo()))
                     .findFirst()
                     .orElse(null);
 
             if (posicion == null || posicion.cantidad().compareTo(BigDecimal.ZERO) == 0) {
-                log.warn("Posición no disponible para venta: usuarioId={}, simbolo={}",
-                        orden.getUserId(), orden.getSimbolo());
+                log.warn("Posición no disponible para venta: usuarioId={}, simbolo={}", orden.getUserId(), orden.getSimbolo());
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
                         "No tiene acciones de " + orden.getSimbolo() + " para vender");
             }
 
             if (posicion.cantidad().compareTo(orden.getCantidad()) < 0) {
-                log.warn("Cantidad insuficiente de acciones: usuarioId={}, simbolo={}, " +
-                        "requerida={}, disponible={}",
-                        orden.getUserId(), orden.getSimbolo(),
-                        orden.getCantidad(), posicion.cantidad());
+                log.warn("Cantidad insuficiente de acciones: usuarioId={}, simbolo={}, " + "requerida={}, disponible={}", orden.getUserId(), orden.getSimbolo(), orden.getCantidad(), posicion.cantidad());
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
                         String.format(
@@ -367,11 +343,11 @@ public class OrdenService {
                                 orden.getSimbolo(), posicion.cantidad(), orden.getCantidad()));
             }
 
-            log.debug("Disponibilidad validada: posee {} de {}",
-                    posicion.cantidad(), orden.getSimbolo());
+            log.debug("Disponibilidad validada: posee {} de {}", posicion.cantidad(), orden.getSimbolo());
 
         } catch (ResponseStatusException e) {
             throw e;
+
         } catch (Exception e) {
             log.error("Error validando disponibilidad de acciones: {}", e.getMessage(), e);
             throw new ResponseStatusException(
@@ -392,7 +368,7 @@ public class OrdenService {
             payload.put("precioLimite", precioLimite);
             payload.put("mensaje", mensaje);
 
-            var request = new HistorialEventosClienteRequest(
+            HistorialEventosClienteRequest request = new HistorialEventosClienteRequest(
                     java.util.UUID.randomUUID(),
                     tipoEvento,
                     orden.getUserId(),

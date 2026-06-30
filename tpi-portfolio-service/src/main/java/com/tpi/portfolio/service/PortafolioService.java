@@ -53,6 +53,7 @@ public class PortafolioService {
     @Transactional
     public PortafolioResponse getPortafolio(String userId) {
         log.info("Buscando o creando portafolio para el usuario: {}", userId);
+        
         Cuenta cuenta = findOrCreateAccount(userId);
 
         List<Posicion> posiciones = posicionRepository.findByAccountId(cuenta.getId());
@@ -68,6 +69,7 @@ public class PortafolioService {
     @Transactional
     public DepositoResponse deposito(String userId, DepositoRequest request) {
         log.info("Procesando depósito para usuario: {}, monto: {}", userId, request.amountArs());
+        
         Cuenta cuenta = findOrCreateAccount(userId);
 
         if (request.amountArs().compareTo(BigDecimal.ZERO) <= 0) {
@@ -76,6 +78,7 @@ public class PortafolioService {
 
         cuenta.setBalanceArs(cuenta.getBalanceArs().add(request.amountArs()));
         cuentaRepository.save(cuenta);
+
 
         MovimientoDinero movement = new MovimientoDinero();
         movement.setAccountId(cuenta.getId());
@@ -88,6 +91,7 @@ public class PortafolioService {
 
         log.info("Depósito completado para usuario: {}. Nuevo saldo: {}", userId, cuenta.getBalanceArs());
         return new DepositoResponse(movement.getId(), cuenta.getBalanceArs());
+
     }
 
     @Transactional
@@ -95,14 +99,16 @@ public class PortafolioService {
         log.info("Aplicando trade para usuario {}: {} {} de {} @ {}", userId, request.side(), request.quantity(), request.symbol(), request.priceArs());
 
         Cuenta cuenta = findOrCreateAccount(userId);
+
         BigDecimal totalAmount = request.priceArs().multiply(request.quantity());
 
         if ("BUY".equalsIgnoreCase(request.side())) {
-            // Lógica de Compra
+
             if (cuenta.getBalanceArs().compareTo(totalAmount) < 0) {
                 log.error("Saldo insuficiente para el usuario {}. Necesario: {}, Disponible: {}", userId, totalAmount, cuenta.getBalanceArs());
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Saldo insuficiente para realizar la compra.");
             }
+
             cuenta.setBalanceArs(cuenta.getBalanceArs().subtract(totalAmount));
 
             Posicion posicion = posicionRepository.findByAccountIdAndSymbol(cuenta.getId(), request.symbol())
@@ -116,7 +122,7 @@ public class PortafolioService {
                         return nuevaPosicion;
                     });
 
-            // Recalcular precio promedio ponderado
+        
             BigDecimal newQuantity = posicion.getQuantity().add(request.quantity());
             BigDecimal newTotalValue = (posicion.getAvgPriceArs().multiply(posicion.getQuantity())).add(totalAmount);
             BigDecimal newAvgPrice = newTotalValue.divide(newQuantity, 4, RoundingMode.HALF_UP);
@@ -126,7 +132,7 @@ public class PortafolioService {
             posicionRepository.save(posicion);
 
         } else if ("SELL".equalsIgnoreCase(request.side())) {
-            // Lógica de Venta
+           
             Posicion posicion = posicionRepository.findByAccountIdAndSymbol(cuenta.getId(), request.symbol())
                     .orElseThrow(() -> {
                         log.error("El usuario {} intentó vender el símbolo {} pero no tiene posición.", userId, request.symbol());
@@ -154,10 +160,6 @@ public class PortafolioService {
         return getPortafolio(userId);
     }
 
-    /**
-     * Busca una cuenta por userId. Si no la encuentra, crea una nueva con saldo cero.
-     * Este método es clave para evitar NullPointerExceptions.
-     */
     private Cuenta findOrCreateAccount(String userId) {
         return cuentaRepository.findByUserId(userId)
                 .orElseGet(() -> {
@@ -178,19 +180,15 @@ public class PortafolioService {
             payload.put("balanceArs", nuevoSaldo);
             payload.put("mensaje", "Depósito acreditado");
 
-            var eventId = UUID.randomUUID();
-            var historialRequest = new HistorialEventoClienteRequest(
-                    eventId,
-                    "DEPOSIT_RECEIVED",
-                    userId,
-                    null,
-                    eventId,
-                    null,
-                    payload
-            );
+            UUID eventId = UUID.randomUUID();
+
+            HistorialEventoClienteRequest historialRequest = new HistorialEventoClienteRequest(
+                    eventId, "DEPOSIT_RECEIVED", userId, null, eventId, null, payload);
 
             restTemplate.postForObject(historialUrl + "/events", historialRequest, Void.class);
+            
             log.debug("Evento de depósito registrado en historial: usuario={}, movementId={}", userId, movementId);
+
         } catch (Exception e) {
             log.warn("Error registrando depósito en historial: {}", e.getMessage());
         }

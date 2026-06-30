@@ -221,6 +221,44 @@
 					"response": []
 				},
 				{
+					"name": "2.3.1 Probar Ajuste de Trade Directo (juan@example.com)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"side\": \"BUY\",\n  \"symbol\": \"AAPL\",\n  \"quantity\": 1,\n  \"priceArs\": 1000.00,\n  \"referenceId\": \"trade-directo-demo-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/users/juan@example.com/trades",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"users",
+								"juan@example.com",
+								"trades"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "2.4 Registrar Orden de Compra (Matching Exitoso)",
 					"request": {
 						"auth": {
